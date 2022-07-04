@@ -25,7 +25,7 @@ def pair_dict_gen(folder_path):
     with open(wav_path, 'rt') as wav_scp:
         for line in wav_scp:
             key, wav = line.strip().split(' ', 1)
-            key_to_wav[key] = '../../' + wav
+            key_to_wav[key] = '../' + wav
 
     if os.path.isfile(segments_path):
         with open(segments_path, 'rt') as segments:
@@ -128,7 +128,7 @@ def load_partition_data_audio(num_client, folder_path, batch_size, window_size, 
 
 
 if __name__ == '__main__':
-    folder_path = "/Users/ultraz/Fed-Mobile/Mobile_Async/data/speech_commands"
+    folder_path = "../data/speech_commands"
     train_path = os.path.join(folder_path, 'train_training')
     test_path = os.path.join(folder_path, 'train_testing')
     reader_to_key, key_to_word, key_to_wav, key_to_seg = pair_dict_gen(train_path)
@@ -137,12 +137,16 @@ if __name__ == '__main__':
 
     # wav_train_data_dict, class_num = audio_partition(10, train_path)
     # print(wav_train_data_dict[1][1])
-    y = 0
-    for x in data_local_num_dict.values():
-        y = y + x
-    print(data_local_num_dict[0])
-    print(train_data_num)
-    print(len(reader_to_key))
-    print(reader_to_key['00176480'])
-    print(key_to_seg['00176480_nohash_0_bed'])
-    print(key_to_word['00176480_nohash_0_bed'])
+    # y = 0
+    # for x in data_local_num_dict.values():
+    #     y = y + x
+    # print(data_local_num_dict[0])
+    # print(train_data_num)
+    # print(len(reader_to_key))
+    # print(reader_to_key['00176480'])
+    # print(key_to_seg['00176480_nohash_0_bed'])
+    # print(key_to_word['00176480_nohash_0_bed'])
+
+    for batch_idx, (_, data, target) in enumerate(train_data_local_dict[0]):
+        print("1")
+        exit()
