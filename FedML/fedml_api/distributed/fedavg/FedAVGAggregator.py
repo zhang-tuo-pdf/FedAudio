@@ -29,6 +29,7 @@ class FedAVGAggregator(object):
         self.train_data_local_num_dict = train_data_local_num_dict
 
         self.worker_num = worker_num
+        self.client_indexes = []
         self.device = device
         self.model_dict = dict()
         self.sample_num_dict = dict()
@@ -97,6 +98,7 @@ class FedAVGAggregator(object):
             np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
             client_indexes = np.random.choice(range(client_num_in_total), num_clients, replace=False)
         logging.info("client_indexes = %s" % str(client_indexes))
+        self.client_indexes = client_indexes
         return client_indexes
 
     def _generate_validation_set(self, num_samples=10000):
@@ -118,9 +120,9 @@ class FedAVGAggregator(object):
             train_num_samples = []
             train_tot_corrects = []
             train_losses = []
-            for client_idx in range(self.args.client_num_in_total):
+            for client_idx in self.client_indexes:
                 # train data
-                metrics = self.trainer.test(self.train_data_local_dict[client_idx], self.device, self.args)
+                metrics = self.trainer.test(self.test_data_local_dict[client_idx], self.device, self.args)
                 train_tot_correct, train_num_sample, train_loss = metrics['test_correct'], metrics['test_total'], metrics['test_loss']
                 train_tot_corrects.append(copy.deepcopy(train_tot_correct))
                 train_num_samples.append(copy.deepcopy(train_num_sample))
@@ -148,8 +150,8 @@ class FedAVGAggregator(object):
 
             if round_idx == self.args.comm_round - 1:
                 metrics = self.trainer.test(self.test_global, self.device, self.args)
-            else:
-                metrics = self.trainer.test(self.val_global, self.device, self.args)
+            # else:
+            #     metrics = self.trainer.test(self.val_global, self.device, self.args)
                 
             test_tot_correct, test_num_sample, test_loss = metrics['test_correct'], metrics['test_total'], metrics[
                 'test_loss']

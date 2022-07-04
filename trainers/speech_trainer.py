@@ -84,5 +84,5 @@ class MyModelTrainer(ModelTrainer):
                 metrics['test_total'] += target.size(0)
         return metrics
 
-    def test_on_the_server(self, train_data_local_dict, test_data_local_dict, device, args=None) -> bool:
+    def test_on_the_server(self, train_data_local_dict, test_data_local_dict, device, args=None, round_idx = None) -> bool:
         return False
