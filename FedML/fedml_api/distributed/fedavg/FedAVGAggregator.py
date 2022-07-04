@@ -122,7 +122,7 @@ class FedAVGAggregator(object):
             train_losses = []
             for client_idx in self.client_indexes:
                 # train data
-                metrics = self.trainer.test(self.test_data_local_dict[client_idx], self.device, self.args)
+                metrics = self.trainer.test(self.train_data_local_dict[client_idx], self.device, self.args)
                 train_tot_correct, train_num_sample, train_loss = metrics['test_correct'], metrics['test_total'], metrics['test_loss']
                 train_tot_corrects.append(copy.deepcopy(train_tot_correct))
                 train_num_samples.append(copy.deepcopy(train_num_sample))
@@ -148,8 +148,8 @@ class FedAVGAggregator(object):
             test_tot_corrects = []
             test_losses = []
 
-            if round_idx == self.args.comm_round - 1:
-                metrics = self.trainer.test(self.test_global, self.device, self.args)
+            # if round_idx == self.args.comm_round - 1:
+            metrics = self.trainer.test(self.test_global, self.device, self.args)
             # else:
             #     metrics = self.trainer.test(self.val_global, self.device, self.args)
                 
