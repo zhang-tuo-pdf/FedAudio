@@ -72,7 +72,7 @@ def add_args(parser):
     parser.add_argument('--is_mobile', type=int, default=0,
                         help='whether the program is running on the FedML-Mobile server side')
 
-    parser.add_argument('--frequency_of_the_test', type=int, default=1,
+    parser.add_argument('--frequency_of_the_test', type=int, default=5,
                         help='the frequency of the algorithms')
 
     parser.add_argument('--gpu_server_num', type=int, default=1,
@@ -157,6 +157,14 @@ if __name__ == "__main__":
 
     args = add_args(argparse.ArgumentParser(description='FedSpeech-Distributed'))
     logger.info(args)
+
+    if process_id == 0:
+        wandb.init(
+        # mode="disabled",
+        project="fedspeech", entity="ultraz",
+        name="FedAVG-r" + str(args.comm_round) + "-e" + str(args.epochs) + "-lr" + str(args.lr) + "-bs" + str(args.batch_size) + 
+        "-c" + str(args.client_num_in_total) + "-" + args.model + "-" + args.dataset,
+        config=args)
 
     # Set the random seed. The np.random seed determines the dataset partition.
     # The torch_manual_seed determines the initial weight.
