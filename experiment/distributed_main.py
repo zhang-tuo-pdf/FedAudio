@@ -37,7 +37,7 @@ def add_args(parser):
     parser.add_argument('--dataset', type=str, default='gcommand', metavar='N',
                         help='dataset used for training')
 
-    parser.add_argument('--data_dir', type=str, default='../data',
+    parser.add_argument('--data_dir', type=str, default='../data/speech_commands',
                         help='data directory')
 
     parser.add_argument('--client_num_in_total', type=int, default=2118, metavar='NN',
@@ -63,8 +63,14 @@ def add_args(parser):
     parser.add_argument('--epochs', type=int, default=120, metavar='EP',
                         help='how many epochs will be trained locally')
 
+    parser.add_argument('--fl_algorithm', type=str, default="FedAvg",
+                        help='Algorithm list: FedAvg; FedOPT; FedProx ')
+
     parser.add_argument('--comm_round', type=int, default=30,
                         help='how many round of communications we shoud use')
+    
+    parser.add_argument('--is_mobile', type=int, default=0,
+                        help='whether the program is running on the FedML-Mobile server side')
 
     parser.add_argument('--frequency_of_the_test', type=int, default=1,
                         help='the frequency of the algorithms')
@@ -189,10 +195,6 @@ if __name__ == "__main__":
         train_data_local_dict,
         test_data_local_dict,
         class_num,
-        train_data_local_plot_dict,
-        test_data_local_plot_dict,
-        train_plot_global,
-        test_plot_global
     ] = dataset
     model = create_model(args)
     model_trainer = custom_model_trainer(args, model)

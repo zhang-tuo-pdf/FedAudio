@@ -20,11 +20,11 @@ class MyModelTrainer(ModelTrainer):
     def set_model_params(self, model_parameters):
         self.model.load_state_dict(model_parameters)
 
-    def train(self, train_data, device, args):
+    def train(self, train_data, device, args, round_idx, client_idx):
         model = self.model
         model.to(device)
         model.train()
-
+        logging.info(" Client ID "+str(client_idx) + " round Idx "+str(round_idx))
         # train and update
         criterion = nn.CrossEntropyLoss().to(device)
         if args.client_optimizer == "sgd":
@@ -42,8 +42,8 @@ class MyModelTrainer(ModelTrainer):
                 loss = criterion(output, target)
                 loss.backward()
 
-                logging.info('Epoch: {}\tBatch Loss: {:.6f}\tBatch Number: {}'.format(
-                    epoch, loss, batch_idx))
+                logging.info('Client Index = {}\tEpoch: {}\tBatch Loss: {:.6f}\tBatch Number: {}'.format(
+                    client_idx, epoch, loss, batch_idx))
 
                 # Uncommet this following line to avoid nan loss
                 # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
