@@ -131,23 +131,18 @@ if __name__ == '__main__':
     folder_path = "/Users/ultraz/Fed-Mobile/Mobile_Async/data/speech_commands"
     train_path = os.path.join(folder_path, 'train_training')
     test_path = os.path.join(folder_path, 'train_testing')
+    reader_to_key, key_to_word, key_to_wav, key_to_seg = pair_dict_gen(train_path)
     train_data_num, test_data_num, train_data_global, test_data_global, data_local_num_dict, train_data_local_dict, test_data_local_dict, \
-    class_num = load_partition_data_audio(128, folder_path, 16, .02, .01, 'hamming', True)
+    class_num = load_partition_data_audio(len(reader_to_key), folder_path, 16, .02, .01, 'hamming', True)
+
     # wav_train_data_dict, class_num = audio_partition(10, train_path)
     # print(wav_train_data_dict[1][1])
-
-    for keys, data, target in test_data_global:
-        print(data)
-        exit()
-
-
-
-
-
-
-
-
-
-
-
-
+    y = 0
+    for x in data_local_num_dict.values():
+        y = y + x
+    print(data_local_num_dict[0])
+    print(train_data_num)
+    print(test_data_num)
+    print(reader_to_key['00176480'])
+    print(key_to_seg['00176480_nohash_0_bed'])
+    print(key_to_word['00176480_nohash_0_bed'])
