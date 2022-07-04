@@ -142,7 +142,7 @@ if __name__ == '__main__':
         y = y + x
     print(data_local_num_dict[0])
     print(train_data_num)
-    print(test_data_num)
+    print(len(reader_to_key))
     print(reader_to_key['00176480'])
     print(key_to_seg['00176480_nohash_0_bed'])
     print(key_to_word['00176480_nohash_0_bed'])

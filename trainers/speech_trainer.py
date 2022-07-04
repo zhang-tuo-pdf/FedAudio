@@ -20,34 +20,20 @@ class MyModelTrainer(ModelTrainer):
     def set_model_params(self, model_parameters):
         self.model.load_state_dict(model_parameters)
 
-    def train(self, client_idx, train_data, device, args):
+    def train(self, train_data, device, args):
         model = self.model
-
-        freeze_param_size = self.param_size * (1 - args.partial_ratio_list[client_idx])
-        param_size = 0
-        for p in model.parameters():
-            param_size += p.numel()
-            if param_size < freeze_param_size:
-                p.requires_grad = False
-            else:
-                p.requires_grad = True
-
-        layer_trained = [1 if p.requires_grad else 0 for p in model.parameters()]
-        # print(layer_trained)
-
         model.to(device)
         model.train()
 
         # train and update
         criterion = nn.CrossEntropyLoss().to(device)
         if args.client_optimizer == "sgd":
-            optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
+            optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
         else:
-            optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr,
-                                         weight_decay=args.wd, amsgrad=True)
+            optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
         epoch_loss = []
-        for epoch in range(args.epochs_list[client_idx]):
+        for epoch in range(args.epochs):
             batch_loss = []
             for batch_idx, (_, data, target) in enumerate(train_data):
                 data, target = data.to(device), target.to(device)
@@ -56,8 +42,8 @@ class MyModelTrainer(ModelTrainer):
                 loss = criterion(output, target)
                 loss.backward()
 
-                logging.info('Client Index = {}\tEpoch: {}\tBatch Loss: {:.6f}\tBatch Number: {}'.format(
-                    client_idx, epoch, loss, batch_idx))
+                logging.info('Epoch: {}\tBatch Loss: {:.6f}\tBatch Number: {}'.format(
+                    epoch, loss, batch_idx))
 
                 # Uncommet this following line to avoid nan loss
                 # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
@@ -69,10 +55,6 @@ class MyModelTrainer(ModelTrainer):
                 batch_loss.append(loss.item())
                 # break
             epoch_loss.append(sum(batch_loss) / len(batch_loss))
-            logging.info('Client Index = {}\tEpoch: {}\tLoss: {:.6f}\tLayer Trained: {}'.format(
-                client_idx, epoch, sum(epoch_loss) / len(epoch_loss), sum(layer_trained)))
-
-        return layer_trained
 
     def test(self, test_data, device, args):
         model = self.model
