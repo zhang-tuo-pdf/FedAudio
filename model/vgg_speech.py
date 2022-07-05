@@ -65,7 +65,7 @@ cfg = {
 }
 
 if __name__ == "__main__":
-    x = torch.ones(16, 40, 99)
+    x = torch.ones(1, 40, 99)
     bcresnet = VGG('VGG11')
     _ = bcresnet(x)
     print(_.shape)

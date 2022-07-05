@@ -126,6 +126,7 @@ class TransitionBlock(nn.Module):
 class BCResNet(torch.nn.Module):
     def __init__(self, num_classes=36):
         super(BCResNet, self).__init__()
+        self.num_classes = num_classes
         self.conv1 = nn.Conv2d(1, 16, 5, stride=(2, 1), padding=(2, 2))
         self.block1_1 = TransitionBlock(16, 8)
         self.block1_2 = BroadcastedBlock(8)
@@ -177,12 +178,14 @@ class BCResNet(torch.nn.Module):
 
         out = out.squeeze()
         out = F.log_softmax(out, dim=-1)
+        out = out.view(-1, self.num_classes)
 
         return out
 
 if __name__ == "__main__":
-    x = torch.ones(16, 40, 99)
-    x = x.view(16, 1, 40, 99)
+    x = torch.ones(1, 40, 99)
+    x = torch.unsqueeze(x, 1)
+    print(x.shape)
     bcresnet = BCResNet()
     _ = bcresnet(x)
     print(_.shape)
