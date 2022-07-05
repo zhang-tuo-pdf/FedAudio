@@ -124,7 +124,7 @@ class TransitionBlock(nn.Module):
 
 
 class BCResNet(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes=36):
         super(BCResNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 16, 5, stride=(2, 1), padding=(2, 2))
         self.block1_1 = TransitionBlock(16, 8)
@@ -145,7 +145,7 @@ class BCResNet(torch.nn.Module):
 
         self.conv2 = nn.Conv2d(20, 20, 5, groups=20, padding=(0, 2))
         self.conv3 = nn.Conv2d(20, 32, 1, bias=False)
-        self.conv4 = nn.Conv2d(32, 12, 1, bias=False)
+        self.conv4 = nn.Conv2d(32, num_classes, 1, bias=False)
 
     def forward(self, x):
 
@@ -186,7 +186,7 @@ class BCResNet(torch.nn.Module):
         return out
 
 if __name__ == "__main__":
-    x = torch.ones(10, 1, 40, 128)
+    x = torch.ones(16, 1, 40, 99)
     bcresnet = BCResNet()
     _ = bcresnet(x)
     print('num parameters:', sum(p.numel() for p in bcresnet.parameters() if p.requires_grad))
