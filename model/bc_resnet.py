@@ -149,40 +149,35 @@ class BCResNet(torch.nn.Module):
 
     def forward(self, x):
 
-        print('INPUT SHAPE:', x.shape)
         out = self.conv1(x)
 
-        print('BLOCK1 INPUT SHAPE:', out.shape)
         out = self.block1_1(out)
         out = self.block1_2(out)
 
-        print('BLOCK2 INPUT SHAPE:', out.shape)
         out = self.block2_1(out)
         out = self.block2_2(out)
 
-        print('BLOCK3 INPUT SHAPE:', out.shape)
         out = self.block3_1(out)
         out = self.block3_2(out)
         out = self.block3_3(out)
         out = self.block3_4(out)
 
-        print('BLOCK4 INPUT SHAPE:', out.shape)
         out = self.block4_1(out)
         out = self.block4_2(out)
         out = self.block4_3(out)
         out = self.block4_4(out)
 
-        print('Conv2 INPUT SHAPE:', out.shape)
         out = self.conv2(out)
 
-        print('Conv3 INPUT SHAPE:', out.shape)
         out = self.conv3(out)
         out = out.mean(-1, keepdim=True)
 
-        print('Conv4 INPUT SHAPE:', out.shape)
         out = self.conv4(out)
 
-        print('OUTPUT SHAPE:', out.shape)
+
+        out = out.squeeze()
+        out = F.log_softmax(out, dim=-1)
+
         return out
 
 if __name__ == "__main__":
@@ -190,4 +185,5 @@ if __name__ == "__main__":
     x = x.view(16, 1, 40, 99)
     bcresnet = BCResNet()
     _ = bcresnet(x)
+    print(_.shape)
     print('num parameters:', sum(p.numel() for p in bcresnet.parameters() if p.requires_grad))
