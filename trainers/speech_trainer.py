@@ -73,8 +73,6 @@ class MyModelTrainer(ModelTrainer):
         with torch.no_grad():
             for keys, data, target in test_data:
                 data = data.to(device)
-                print('INPUT SHAPE:', data.shape)
-                exit()
                 target = target.to(device)
                 output = model(data)
                 loss = criterion(output, target).data.item()
