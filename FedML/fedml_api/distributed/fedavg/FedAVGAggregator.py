@@ -117,31 +117,31 @@ class FedAVGAggregator(object):
 
         if round_idx % self.args.frequency_of_the_test == 0 or round_idx == self.args.comm_round - 1:
             logging.info("################test_on_server_for_all_clients : {}".format(round_idx))
-            train_num_samples = []
-            train_tot_corrects = []
-            train_losses = []
-            for client_idx in self.client_indexes:
-                # train data
-                metrics = self.trainer.test(self.train_data_local_dict[client_idx], self.device, self.args)
-                train_tot_correct, train_num_sample, train_loss = metrics['test_correct'], metrics['test_total'], metrics['test_loss']
-                train_tot_corrects.append(copy.deepcopy(train_tot_correct))
-                train_num_samples.append(copy.deepcopy(train_num_sample))
-                train_losses.append(copy.deepcopy(train_loss))
+            # train_num_samples = []
+            # train_tot_corrects = []
+            # train_losses = []
+            # for client_idx in self.client_indexes:
+            #     # train data
+            #     metrics = self.trainer.test(self.train_data_local_dict[client_idx], self.device, self.args)
+            #     train_tot_correct, train_num_sample, train_loss = metrics['test_correct'], metrics['test_total'], metrics['test_loss']
+            #     train_tot_corrects.append(copy.deepcopy(train_tot_correct))
+            #     train_num_samples.append(copy.deepcopy(train_num_sample))
+            #     train_losses.append(copy.deepcopy(train_loss))
+            #
+            #     """
+            #     Note: CI environment is CPU-based computing.
+            #     The training speed for RNN training is to slow in this setting, so we only test a client to make sure there is no programming error.
+            #     """
+            #     if self.args.ci == 1:
+            #         break
 
-                """
-                Note: CI environment is CPU-based computing. 
-                The training speed for RNN training is to slow in this setting, so we only test a client to make sure there is no programming error.
-                """
-                if self.args.ci == 1:
-                    break
-
-            # test on training dataset
-            train_acc = sum(train_tot_corrects) / sum(train_num_samples)
-            train_loss = sum(train_losses) / sum(train_num_samples)
-            wandb.log({"Train/Acc": train_acc, "round": round_idx})
-            wandb.log({"Train/Loss": train_loss, "round": round_idx})
-            stats = {'training_acc': train_acc, 'training_loss': train_loss}
-            logging.info(stats)
+            # # test on training dataset
+            # train_acc = sum(train_tot_corrects) / sum(train_num_samples)
+            # train_loss = sum(train_losses) / sum(train_num_samples)
+            # wandb.log({"Train/Acc": train_acc, "round": round_idx})
+            # wandb.log({"Train/Loss": train_loss, "round": round_idx})
+            # stats = {'training_acc': train_acc, 'training_loss': train_loss}
+            # logging.info(stats)
 
             # test data
             test_num_samples = []
