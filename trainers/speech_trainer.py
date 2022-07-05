@@ -37,7 +37,7 @@ class MyModelTrainer(ModelTrainer):
             batch_loss = []
             for batch_idx, (_, data, target) in enumerate(train_data):
                 if args.model == 'BC_ResNet':
-                    data = data.view(16, 1, 40, 99)
+                    data = torch.unsqueeze(data, 1)
                 data, target = data.to(device), target.to(device)
                 optimizer.zero_grad()
                 output = model(data)
@@ -74,6 +74,8 @@ class MyModelTrainer(ModelTrainer):
 
         with torch.no_grad():
             for keys, data, target in test_data:
+                if args.model == 'BC_ResNet':
+                    data = torch.unsqueeze(data, 1)
                 data = data.to(device)
                 target = target.to(device)
                 output = model(data)
