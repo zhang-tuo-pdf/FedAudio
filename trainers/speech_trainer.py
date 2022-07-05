@@ -36,6 +36,8 @@ class MyModelTrainer(ModelTrainer):
         for epoch in range(args.epochs):
             batch_loss = []
             for batch_idx, (_, data, target) in enumerate(train_data):
+                if args.model == 'BC_ResNet':
+                    data = data.view(16, 1, 40, 99)
                 data, target = data.to(device), target.to(device)
                 optimizer.zero_grad()
                 output = model(data)

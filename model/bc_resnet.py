@@ -186,7 +186,8 @@ class BCResNet(torch.nn.Module):
         return out
 
 if __name__ == "__main__":
-    x = torch.ones(16, 1, 40, 99)
+    x = torch.ones(16, 40, 99)
+    x = x.view(16, 1, 40, 99)
     bcresnet = BCResNet()
     _ = bcresnet(x)
     print('num parameters:', sum(p.numel() for p in bcresnet.parameters() if p.requires_grad))

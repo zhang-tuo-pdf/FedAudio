@@ -1,4 +1,5 @@
 import math
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -62,3 +63,9 @@ cfg = {
     'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
     'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 }
+
+if __name__ == "__main__":
+    x = torch.ones(16, 40, 99)
+    bcresnet = VGG('VGG11')
+    _ = bcresnet(x)
+    print('num parameters:', sum(p.numel() for p in bcresnet.parameters() if p.requires_grad))
