@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
 from data_preprocess.speech_dataloader import load_partition_data_audio
 from model.vgg_speech import VGG
 from model.LeNet import LeNet
+from model.bc_resnet import BCResNet
 from trainers.speech_trainer import MyModelTrainer
 from FedML.fedml_api.distributed.fedavg.FedAvgAPI import FedML_init, FedML_FedAvg_distributed
 from FedML.fedml_api.distributed.fedopt.FedOptAPI import FedML_FedOpt_distributed
@@ -31,7 +32,7 @@ def add_args(parser):
     return a parser added with args required by fit
     """
     # Training settings
-    parser.add_argument('--model', type=str, default='VGG11', metavar='N',
+    parser.add_argument('--model', type=str, default='BC_ResNet', metavar='N',
                         help='neural network used in training')
 
     parser.add_argument('--dataset', type=str, default='gcommand', metavar='N',
@@ -116,8 +117,10 @@ def create_model(args):
     model = None
     if args.model.startswith('VGG'):
         model = VGG(args.model)
-    elif args.model == 'LeNet':
+    if args.model == 'LeNet':
         model = LeNet()
+    elif args.model == 'BC_ResNet':
+        model = BCResNet()
     return model
 
 def custom_model_trainer(args, model):
@@ -160,7 +163,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-        # mode="disabled",
+        mode="disabled",
         project="fedspeech", entity="ultraz",
         name="FedAVG-r" + str(args.comm_round) + "-e" + str(args.epochs) + "-lr" + str(args.lr) + "-bs" + str(args.batch_size) + 
         "-c" + str(args.client_num_in_total) + "-" + args.model + "-" + args.dataset,
