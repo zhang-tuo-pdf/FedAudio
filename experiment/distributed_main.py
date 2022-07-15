@@ -17,7 +17,7 @@ from tqdm import tqdm
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
 
-from data_preprocess.speech_dataloader import load_partition_data_audio
+from data_loading.data_loader.gcommand_loader import load_partition_data_audio
 from model.vgg_speech import VGG
 from model.LeNet import LeNet
 from model.bc_resnet import BCResNet

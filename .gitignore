@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# data folder path
+data/speech_commands/audio/*
+
+# wanbd folder
+experiment/wandb/*

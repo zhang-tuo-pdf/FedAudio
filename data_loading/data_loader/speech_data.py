@@ -4,7 +4,7 @@ import struct
 import wave
 
 import numpy as np
-from .mfsc import mfsc
+from data_loading.mfsc import mfsc
 import torch
 import torch.utils.data as data
 

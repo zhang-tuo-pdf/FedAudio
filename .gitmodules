@@ -1,0 +1,3 @@
+[submodule "data_loading/data_preprocess/s3prl"]
+	path = data_loading/data_preprocess/s3prl
+	url = https://github.com/s3prl/s3prl.git
