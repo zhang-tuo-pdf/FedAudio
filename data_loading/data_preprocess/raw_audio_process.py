@@ -46,4 +46,13 @@ def mel_spectrogram(audio_file_path, n_fft=1024, feature_len=128):
     )
 
     audio_amp_to_db = torchaudio.transforms.AmplitudeToDB()
-    return audio_amp_to_db(audio_transform(audio).detach())[0]
+    
+    return audio_amp_to_db(audio_transform(audio).detach())[0].cpu().numpy()
+
+if __name__ == '__main__':
+    audio_file_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/audio/bed/0a7c2a8d_nohash_0.wav"
+    features = mfcc(audio_file_path)
+    print(features)
+    features = mel_spectrogram(audio_file_path)
+    print(features)
+

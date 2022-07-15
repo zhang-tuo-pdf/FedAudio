@@ -5,15 +5,17 @@ import sys
 
 
 def pretrained_feature(audio_file_path, feature_type):
-    # read audio
-    audio, sample_rate = torchaudio.load(audio_file_path)
-    transform_model = torchaudio.transforms.Resample(sample_rate, 16000)
-    audio = transform_model(audio)
 
     device = torch.device("cuda:0") if torch.cuda.is_available() else "cpu"
     if torch.cuda.is_available():
         print("GPU available, use GPU")
     model = getattr(hub, feature_type)().to(device)
+
+    # read audio
+    audio, sample_rate = torchaudio.load(audio_file_path)
+    transform_model = torchaudio.transforms.Resample(sample_rate, 16000)
+    audio = transform_model(audio).to(device)
+
     if (
         feature_type == "distilhubert"
         or feature_type == "wav2vec2"
@@ -28,7 +30,7 @@ def pretrained_feature(audio_file_path, feature_type):
 if __name__ == '__main__':
     if sys.platform == "darwin":
         os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
-    audio_file_path = "/Users/ultraz/Research/FedSpeech22/data/speech_commands/audio/backward/0a2b400e_nohash_0.wav"
+    audio_file_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/audio/bed/0a7c2a8d_nohash_0.wav"
     feature_type = "apc"
     features = pretrained_feature(audio_file_path, feature_type)
     print(features)
