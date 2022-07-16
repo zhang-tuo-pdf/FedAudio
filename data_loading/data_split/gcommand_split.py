@@ -56,11 +56,12 @@ def split(a, n):
     k, m = divmod(len(a), n)
     return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
-def audio_partition(num_client, folder_path):
+def audio_partition(folder_path):
 
     classes, weight, class_to_id = get_classes()
     class_num = len(classes)
     reader_to_key, key_to_word, key_to_wav, key_to_seg = pair_dict_gen(folder_path)
+    num_client = len(reader_to_key.keys())
     reader_partition = list(split(list(reader_to_key.keys()), num_client))
     wav_data_dict = dict()
     segments_path = os.path.join(folder_path, 'segments')
@@ -88,3 +89,6 @@ def audio_partition(num_client, folder_path):
             wav_data_dict[0].append(wav_item)
 
     return wav_data_dict, class_num
+
+if __name__ == '__main__':
+    wav_data_dict, class_num = audio_partition
