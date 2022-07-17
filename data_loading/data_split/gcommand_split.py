@@ -77,7 +77,7 @@ def audio_partition(folder_path):
                     wav_command = key_to_wav[wav_key]
                     word = key_to_word[key]
                     word_id = class_to_id[word]
-                    wav_item = [key, wav_command, [seg_ini, seg_end], word_id]
+                    wav_item = [key, wav_command, word_id]
                     wav_data_dict[idx].append(wav_item)
     #test_data
     else:
@@ -94,8 +94,8 @@ if __name__ == '__main__':
     #train data
     folder_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/train_training"
     wav_data_dict, class_num = audio_partition(folder_path)
-    # print(wav_data_dict[1])
+    print(wav_data_dict[1])
     #test data
-    folder_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/train_testing"
-    wav_data_dict, class_num = audio_partition(folder_path)
-    print(wav_data_dict[0])
+    # folder_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/train_testing"
+    # wav_data_dict, class_num = audio_partition(folder_path)
+    # print(wav_data_dict[0])
