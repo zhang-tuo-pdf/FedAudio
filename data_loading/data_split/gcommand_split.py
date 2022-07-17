@@ -94,7 +94,7 @@ if __name__ == '__main__':
     #train data
     folder_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/train_training"
     wav_data_dict, class_num = audio_partition(folder_path)
-    print(wav_data_dict[1])
+    print(wav_data_dict[1][0][0])
     #test data
     # folder_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/train_testing"
     # wav_data_dict, class_num = audio_partition(folder_path)
