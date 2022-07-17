@@ -130,6 +130,7 @@ dmypy.json
 
 # data folder path
 data/speech_commands/audio/*
+data/speech_commands/fl_dataset/*
 
 # wanbd folder
 experiment/wandb/*

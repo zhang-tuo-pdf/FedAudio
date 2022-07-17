@@ -6,6 +6,7 @@ import copy, pdb
 import torch, torchaudio
 import os
 import sys
+from tqdm import tqdm
 from pathlib import Path
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
@@ -46,14 +47,13 @@ if __name__ == '__main__':
     
     output_folder = '/home/ultraz/Project/FedSpeech22/data/speech_commands/fl_dataset/'
     Path.mkdir(Path(output_folder), parents=True, exist_ok=True)
-    for i in range(len(wav_data_dict)):
+    for i in tqdm(range(len(wav_data_dict))):
         for j in range(len(wav_data_dict[i])):
             audio_file_path = "../" + wav_data_dict[i][j][1]
             output_file_path = output_folder + wav_data_dict[i][j][0] + '.wav'
             add_noise_snr(audio_file_path, output_file_path, target_snr_db[i])
             wav_data_dict[i][j][1] = output_file_path
-            exit()
-    
+    print(wav_data_dict[1500][0][1])
 
 
     
