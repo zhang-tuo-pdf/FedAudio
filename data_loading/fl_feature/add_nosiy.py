@@ -4,6 +4,12 @@
 import numpy as np
 import copy, pdb
 import torch, torchaudio
+import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
+from data_split.gcommand_split import audio_partition
 
 def add_noise_snr(audio_file_path, output_path, target_snr_db):
     
@@ -25,11 +31,29 @@ def add_noise_snr(audio_file_path, output_path, target_snr_db):
     torchaudio.save(output_path, noise_audio, sample_rate)
 
 if __name__ == '__main__':
-    #train data
-    audio_file_path = "/Users/ultraz/Research/FedSpeech22/data/test.wav"
-    output_path = "/Users/ultraz/Research/FedSpeech22/data/"
-    file_name = ['test20.wav', 'test30.wav', 'test40.wav']
-    target_snr_db = [20, 30, 40]
-    for i in range(len(file_name)):
-        output_file_path = output_path + file_name[i]
-        add_noise_snr(audio_file_path, output_file_path, target_snr_db[i])
+    #step 0 train data split
+    folder_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/train_training"
+    wav_data_dict, class_num = audio_partition(folder_path)
+    #step 1 create fl dataset
+    snr_level = [20, 30, 40]
+    device_ratio = [round(0.4 * len(wav_data_dict)), round(0.3 * len(wav_data_dict)), round(0.3 * len(wav_data_dict))]
+    target_snr_db = [0] * len(wav_data_dict)
+    start = 0
+    for i in range(len(device_ratio)):
+        end = start + device_ratio[i]
+        target_snr_db[start:end] = [snr_level[i]] * device_ratio[i]
+        start = end
+    
+    output_folder = '/home/ultraz/Project/FedSpeech22/data/speech_commands/fl_dataset/'
+    Path.mkdir(Path(output_folder), parents=True, exist_ok=True)
+    for i in range(len(wav_data_dict)):
+        for j in range(len(wav_data_dict[i])):
+            audio_file_path = "../" + wav_data_dict[i][j][1]
+            output_file_path = output_folder + wav_data_dict[i][j][0] + '.wav'
+            add_noise_snr(audio_file_path, output_file_path, target_snr_db[i])
+            wav_data_dict[i][j][1] = output_file_path
+            exit()
+    
+
+
+    
