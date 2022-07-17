@@ -19,18 +19,17 @@ def add_noise_snr(audio_file_path, output_path, target_snr_db):
     noise_energy_watts = 10 ** (noise_energy_db / 10)
     
     # Guassian noise addition
-    noise = np.random.normal(0, np.sqrt(noise_energy_watts), len(audio))
+    noise = np.random.normal(0, np.sqrt(noise_energy_watts), audio.shape[1])
     noise_audio = audio + noise
     noise_audio = noise_audio.type(torch.float32)
-    pdb.set_trace()
     torchaudio.save(output_path, noise_audio, sample_rate)
 
 if __name__ == '__main__':
     #train data
-    audio_file_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands/audio/bed/0a7c2a8d_nohash_0.wav"
-    output_path = "/home/ultraz/Project/FedSpeech22/data/"
-    file_name = ['test1.wav', 'test10.wav', 'test50.wav', 'test100.wav']
-    target_snr_db = [1, 10, 50, 100]
+    audio_file_path = "/Users/ultraz/Research/FedSpeech22/data/test.wav"
+    output_path = "/Users/ultraz/Research/FedSpeech22/data/"
+    file_name = ['test20.wav', 'test30.wav', 'test40.wav']
+    target_snr_db = [20, 30, 40]
     for i in range(len(file_name)):
         output_file_path = output_path + file_name[i]
         add_noise_snr(audio_file_path, output_file_path, target_snr_db[i])
