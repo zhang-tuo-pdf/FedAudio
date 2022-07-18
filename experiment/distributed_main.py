@@ -15,6 +15,10 @@ from tqdm import tqdm
 
 # add the FedML root directory to the python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_loader")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_preprocess")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_split")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
 
 from data_loading.data_loader.gcommand_loader import load_partition_data_audio
@@ -328,20 +332,20 @@ if __name__ == "__main__":
     model_trainer = custom_model_trainer(args, model)
     logging.info(model)
 
-    # start "federated averaging (FedAvg)"
-    fl_alg = get_fl_algorithm_initializer(args.fl_algorithm)
-    fl_alg(
-        process_id,
-        worker_number,
-        device,
-        comm,
-        model,
-        train_data_num,
-        train_data_global,
-        test_data_global,
-        train_data_local_num_dict,
-        train_data_local_dict,
-        test_data_local_dict,
-        args,
-        model_trainer,
-    )
+    # # start "federated averaging (FedAvg)"
+    # fl_alg = get_fl_algorithm_initializer(args.fl_algorithm)
+    # fl_alg(
+    #     process_id,
+    #     worker_number,
+    #     device,
+    #     comm,
+    #     model,
+    #     train_data_num,
+    #     train_data_global,
+    #     test_data_global,
+    #     train_data_local_num_dict,
+    #     train_data_local_dict,
+    #     test_data_local_dict,
+    #     args,
+    #     model_trainer,
+    # )
