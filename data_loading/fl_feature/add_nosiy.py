@@ -53,7 +53,6 @@ if __name__ == '__main__':
             output_file_path = output_folder + wav_data_dict[i][j][0] + '.wav'
             add_noise_snr(audio_file_path, output_file_path, target_snr_db[i])
             wav_data_dict[i][j][1] = output_file_path
-    print(wav_data_dict[1500][0][1])
 
 
     
