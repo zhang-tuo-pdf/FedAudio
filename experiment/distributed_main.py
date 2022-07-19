@@ -4,6 +4,7 @@ import os
 import random
 import socket
 import sys
+import pickle
 
 import numpy as np
 import psutil
@@ -172,41 +173,43 @@ def add_args(parser):
 
 
 def load_data(args, dataset_name):
-    process_method = "pretrain"
-    feature_type = "apc"
-    fl_feature = True
-    snr_level = [20, 30, 40]
-    device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
+    # process_method = "pretrain"
+    # feature_type = "apc"
+    # fl_feature = True
+    # snr_level = [20, 30, 40]
+    # device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
     if dataset_name == "gcommand":
-        data_loader = load_partition_data_audio
-        (
-            train_data_num,
-            test_data_num,
-            train_data_global,
-            test_data_global,
-            train_data_local_num_dict,
-            train_data_local_dict,
-            test_data_local_dict,
-            class_num,
-        ) = data_loader(
-            args.batch_size,
-            process_method,
-            feature_type=feature_type,
-            fl_feature=fl_feature,
-            snr_level=snr_level,
-            device_ratio=device_ratio,
-        )
-
-    dataset = [
-        train_data_num,
-        test_data_num,
-        train_data_global,
-        test_data_global,
-        train_data_local_num_dict,
-        train_data_local_dict,
-        test_data_local_dict,
-        class_num,
-    ]
+        load_file_path = "../data/speech_commands/processed_dataset.p"
+        dataset = pickle.load(open(load_file_path, "rb"))
+    #     data_loader = load_partition_data_audio
+    #     (
+    #         train_data_num,
+    #         test_data_num,
+    #         train_data_global,
+    #         test_data_global,
+    #         train_data_local_num_dict,
+    #         train_data_local_dict,
+    #         test_data_local_dict,
+    #         class_num,
+    #     ) = data_loader(
+    #         args.batch_size,
+    #         process_method,
+    #         feature_type=feature_type,
+    #         fl_feature=fl_feature,
+    #         snr_level=snr_level,
+    #         device_ratio=device_ratio,
+    #     )
+    #
+    # dataset = [
+    #     train_data_num,
+    #     test_data_num,
+    #     train_data_global,
+    #     test_data_global,
+    #     train_data_local_num_dict,
+    #     train_data_local_dict,
+    #     test_data_local_dict,
+    #     class_num,
+    # ]
     return dataset
 
 

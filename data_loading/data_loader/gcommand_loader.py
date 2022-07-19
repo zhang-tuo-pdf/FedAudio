@@ -142,3 +142,15 @@ if __name__ == "__main__":
         snr_level=snr_level,
         device_ratio=device_ratio,
     )
+    dataset = [
+        train_data_num,
+        test_data_num,
+        train_data_global,
+        test_data_global,
+        data_local_num_dict,
+        train_data_local_dict,
+        test_data_local_dict,
+        class_num,
+    ]
+    save_data_path = "../../data/speech_commands/processed_dataset.p"
+    pickle.dump(dataset, open(save_data_path, "wb"))
