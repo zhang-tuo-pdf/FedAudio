@@ -5,9 +5,11 @@ import pickle
 from tqdm import tqdm
 from pathlib import Path
 import torch.utils.data as data
-from speech_data import DatasetGenerator, collate_fn_padd
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
+
+from speech_data import DatasetGenerator, collate_fn_padd
 from data_split.gcommand_split import audio_partition
 from fl_feature.add_nosiy import add_noise_snr
 from data_preprocess.opensmile_extractor import opensmile_feature
@@ -55,6 +57,13 @@ def load_partition_data_audio(
                         output_folder + wav_train_data_dict[i][j][0] + ".wav"
                     )
                     add_noise_snr(audio_file_path, output_file_path, target_snr_db[i])
+                    wav_train_data_dict[i][j][1] = output_file_path
+        else:
+            for i in tqdm(range(len(wav_train_data_dict))):
+                for j in range(len(wav_train_data_dict[i])):
+                    output_file_path = (
+                        output_folder + wav_train_data_dict[i][j][0] + ".wav"
+                    )
                     wav_train_data_dict[i][j][1] = output_file_path
     logging.info("federated learning feature loaded")
 
