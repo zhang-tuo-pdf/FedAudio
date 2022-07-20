@@ -226,7 +226,7 @@ def create_model(args):
     if args.model == "LeNet":
         model = LeNet()
     if args.model == "audio_conv_rnn":
-        model = audio_conv_rnn(pred='commands', audio_size=128, dropout=0.1, label_size=35)
+        model = audio_conv_rnn(pred='commands', audio_size=512, dropout=0.1, label_size=35)
     elif args.model == "BC_ResNet":
         model = BCResNet()
     return model

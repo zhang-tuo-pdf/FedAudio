@@ -1,4 +1,4 @@
-import torch
+import torch, pdb
 from torch.utils.data import DataLoader
 
 # dataset = DatasetGenerator(data_dict)
@@ -13,7 +13,7 @@ class DatasetGenerator:
         return len(self.dataset)
 
     def __getitem__(self, item):
-        data = self.dataset[item][3]
+        data = self.dataset[item][3][0]
         label = self.dataset[item][2]
         return torch.tensor(data), torch.tensor(int(label))
 
@@ -21,6 +21,7 @@ class DatasetGenerator:
 def pad_tensor(vec, pad):
     pad_size = list(vec.shape)
     pad_size[0] = pad - vec.size(0)
+    # print('pad size is ', pad_size[0])
     return torch.cat([vec, torch.zeros(*pad_size)], dim=0)
 
 
@@ -32,6 +33,10 @@ def collate_fn_padd(batch):
         data.append(pad_tensor(batch[idx][0], pad=audio_max_len))
         labels.append(batch[idx][1])
         lens.append(len(batch[idx][0]))
+        # (batch[idx][0] TXD
+        # print('data length is ', len((batch[idx][0])))
+        # print('max length is ', audio_max_len)
+        # print('padd shape is ', pad_tensor(batch[idx][0], pad=audio_max_len).shape)
     data, labels, lens = (
         torch.stack(data, dim=0),
         torch.stack(labels, dim=0),

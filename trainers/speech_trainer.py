@@ -1,4 +1,4 @@
-import logging
+import logging, pdb
 from math import ceil
 import torch
 from torch import nn
@@ -35,13 +35,13 @@ class MyModelTrainer(ModelTrainer):
         epoch_loss = []
         for epoch in range(args.epochs):
             batch_loss = []
-            for batch_idx, (_, data, target) in enumerate(train_data):
-                if args.model == 'BC_ResNet':
-                    data = torch.unsqueeze(data, 1)
-                data, target = data.to(device), target.to(device)
+            #  data, labels, lens
+            for batch_idx, (data, labels, lens) in enumerate(train_data):
+                #data = torch.squeeze(data, 1)
+                data, labels, lens = data.to(device), labels.to(device), lens.to(device)
                 optimizer.zero_grad()
-                output = model(data)
-                loss = criterion(output, target)
+                output = model(data, lens)
+                loss = criterion(output, labels)
                 loss.backward()
 
                 logging.info('Client Index = {}\tEpoch: {}\tBatch Loss: {:.6f}\tBatch Number: {}'.format(

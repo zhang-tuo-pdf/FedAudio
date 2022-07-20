@@ -189,7 +189,7 @@ class audio_conv_rnn(nn.Module):
         
         self.rnn = self.rnn_cell(input_size=64, hidden_size=64, 
                                  num_layers=1, batch_first=True, 
-                                 dropout=self.dropout_p, bidirectional=True)
+                                 dropout=self.dropout_p, bidirectional=True).cuda()
         
         self.init_weight()
 
