@@ -73,19 +73,16 @@ class MyModelTrainer(ModelTrainer):
         criterion = nn.CrossEntropyLoss(reduction='sum').to(device)
 
         with torch.no_grad():
-            for keys, data, target in test_data:
-                if args.model == 'BC_ResNet':
-                    data = torch.unsqueeze(data, 1)
-                data = data.to(device)
-                target = target.to(device)
-                output = model(data)
-                loss = criterion(output, target).data.item()
+            for data, labels, lens in test_data:
+                data, labels, lens = data.to(device), labels.to(device), lens.to(device)
+                output = model(data, lens)
+                loss = criterion(output, labels).data.item()
                 pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
-                correct = pred.eq(target.data.view_as(pred)).sum()
+                correct = pred.eq(labels.data.view_as(pred)).sum()
 
                 metrics['test_correct'] += correct.item()
-                metrics['test_loss'] += loss * target.size(0)
-                metrics['test_total'] += target.size(0)
+                metrics['test_loss'] += loss * labels.size(0)
+                metrics['test_total'] += labels.size(0)
         return metrics
 
     def test_on_the_server(self, train_data_local_dict, test_data_local_dict, device, args=None, round_idx = None) -> bool:

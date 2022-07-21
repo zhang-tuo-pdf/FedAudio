@@ -169,7 +169,7 @@ class audio_conv_rnn(nn.Module):
     def __init__(self, pred, audio_size, dropout, label_size=4):
         super(audio_conv_rnn, self).__init__()
         self.dropout_p = dropout
-        self.rnn_cell = nn.GRU
+        # self.rnn_cell = nn.GRU
         
         self.pred_layer = nn.Sequential(
             nn.Linear(128, 64),
@@ -178,18 +178,18 @@ class audio_conv_rnn(nn.Module):
         )
         
         self.conv = nn.Sequential(
-            nn.Conv1d(audio_size, 32, kernel_size=3, padding=1),
+            nn.Conv1d(audio_size, 64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(2),
-            nn.Conv1d(32, 64, kernel_size=3, padding=1),
+            nn.Conv1d(64, 128, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(2),
             nn.Dropout(self.dropout_p),
         )
         
-        self.rnn = self.rnn_cell(input_size=64, hidden_size=64, 
-                                 num_layers=1, batch_first=True, 
-                                 dropout=self.dropout_p, bidirectional=True).cuda()
+        # self.rnn = self.rnn_cell(input_size=64, hidden_size=64, 
+        #                          num_layers=1, batch_first=True, 
+        #                          dropout=self.dropout_p, bidirectional=True).cuda()
         
         self.init_weight()
 
@@ -207,18 +207,20 @@ class audio_conv_rnn(nn.Module):
         # conv modul
         audio = self.conv(audio.float().permute(0, 2, 1))
         audio = audio.permute(0, 2, 1)
+        '''
         if lengths is None:
             # output
-            x_output, _ = self.rnn(audio)
-            z = torch.mean(x_output, dim=1)
+            # x_output, _ = self.rnn(audio)
+            z = torch.mean(audio, dim=1)
         else:
             # rnn modul
             audio_packed = pack_padded_sequence(audio, lengths.cpu(), batch_first=True, enforce_sorted=False)
             output_packed, h_state = self.rnn(audio_packed)
             x_output, _ = pad_packed_sequence(output_packed, True, total_length=audio.size(1))
-            
-            # output
-            z = torch.sum(x_output, dim=1) / torch.unsqueeze(lengths, 1)
+        '''
+        
+        # output
+        z = torch.sum(audio, dim=1) / torch.unsqueeze(lengths, 1)
         preds = self.pred_layer(z)
         preds = torch.log_softmax(preds, dim=1)
         return preds
