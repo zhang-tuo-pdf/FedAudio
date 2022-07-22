@@ -117,12 +117,16 @@ class FedAVGAggregator(object):
     def get_average_weight(self, client_indexes):
         average_weight_dict = {}
         training_num = 0
-        for client_index in client_indexes:
-            training_num += self.train_data_local_num_dict[client_index]
+        # for client_index in client_indexes:
+        #     training_num += self.train_data_local_num_dict[client_index]
 
+        # for client_index in client_indexes:
+        #     average_weight_dict[client_index] = (
+        #         self.train_data_local_num_dict[client_index] / training_num
+        #     )
         for client_index in client_indexes:
             average_weight_dict[client_index] = (
-                self.train_data_local_num_dict[client_index] / training_num
+                1 / len(client_indexes)
             )
         return average_weight_dict
 
@@ -259,8 +263,7 @@ class FedAVGAggregator(object):
             # test on test dataset
             test_acc = sum(test_tot_corrects) / sum(test_num_samples)
             test_loss = sum(test_losses) / sum(test_num_samples)
-            if self.args.enable_wandb:
-                wandb.log({"Test/Acc": test_acc, "round": round_idx})
-                wandb.log({"Test/Loss": test_loss, "round": round_idx})
+            wandb.log({"Test/Acc": test_acc, "round": round_idx})
+            wandb.log({"Test/Loss": test_loss, "round": round_idx})
             stats = {"test_acc": test_acc, "test_loss": test_loss}
             logging.info(stats)

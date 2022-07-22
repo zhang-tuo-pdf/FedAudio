@@ -2,6 +2,7 @@ import logging, pdb
 from math import ceil
 import torch
 from torch import nn
+from tqdm import tqdm
 
 try:
     from fedml_core.trainer.model_trainer import ModelTrainer
@@ -73,7 +74,8 @@ class MyModelTrainer(ModelTrainer):
         criterion = nn.CrossEntropyLoss(reduction='sum').to(device)
 
         with torch.no_grad():
-            for data, labels, lens in test_data:
+            for batch_idx, (data, labels, lens) in enumerate(tqdm(test_data)):
+            # for data, labels, lens in test_data:
                 data, labels, lens = data.to(device), labels.to(device), lens.to(device)
                 output = model(data, lens)
                 loss = criterion(output, labels).data.item()

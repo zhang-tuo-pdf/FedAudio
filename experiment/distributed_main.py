@@ -32,6 +32,10 @@ from FedML.fedml_api.distributed.fedavg.FedAvgAPI import (
     FedML_init,
     FedML_FedAvg_distributed,
 )
+from FedML.fedml_api.distributed.fedavg_seq.FedAvgSeqAPI import (
+    FedML_init,
+    FedML_FedAvgSeq_distributed,
+)
 from FedML.fedml_api.distributed.fedopt.FedOptAPI import FedML_FedOpt_distributed
 from FedML.fedml_api.distributed.fedprox.FedProxAPI import FedML_FedProx_distributed
 
@@ -78,6 +82,8 @@ def add_args(parser):
         help="number of workers",
     )
 
+    parser.add_argument("--gpu_worker_num", type=int, default=8, help="total gpu num")
+
     parser.add_argument(
         "--batch_size",
         type=int,
@@ -117,7 +123,7 @@ def add_args(parser):
     parser.add_argument(
         "--fl_algorithm",
         type=str,
-        default="FedAvg",
+        default="FedAvgSeq",
         help="Algorithm list: FedAvg; FedOPT; FedProx ",
     )
 
@@ -248,6 +254,8 @@ def set_seed(seed):
 def get_fl_algorithm_initializer(alg_name):
     if alg_name == "FedAvg":
         fl_algorithm = FedML_FedAvg_distributed
+    elif alg_name == "FedAvgSeq":
+        fl_algorithm = FedML_FedAvgSeq_distributed
     elif alg_name == "FedOPT":
         fl_algorithm = FedML_FedOpt_distributed
     elif alg_name == "FedProx":
@@ -278,7 +286,7 @@ if __name__ == "__main__":
             mode="disabled",
             project="fedspeech",
             entity="ultraz",
-            name="FedAVG-r"
+            name="FedAVG-r-new"
             + str(args.comm_round)
             + "-e"
             + str(args.epochs)
@@ -310,7 +318,7 @@ if __name__ == "__main__":
         )
     else:
         process_gpu_dict = dict()
-        for client_index in range(args.client_num_in_total):
+        for client_index in range(args.gpu_worker_num):
             gpu_index = client_index % args.gpu_num_per_server + args.starting_gpu
             process_gpu_dict[client_index] = gpu_index
 
