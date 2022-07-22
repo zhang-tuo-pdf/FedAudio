@@ -104,7 +104,27 @@ def load_partition_data_audio(
     logging.info("finish data loading")
 
     train_data_global = None
+
+    #test dataset
     wav_global_test, class_num = audio_partition(test_path)
+    # step 2 preprocess data
+    logging.info("begin test data preprocess")
+    if process_method == "pretrain":
+        device, model = load_model(feature_type)
+    for i in range(len(wav_global_test)):
+        for j in tqdm(range(len(wav_global_test[i]))):
+            # audio_file_path = wav_global_test[i][j][1]
+            audio_file_path = "../" + wav_global_test[i][j][1]
+            if process_method == "opensmile_feature":
+                features = opensmile_feature(audio_file_path, feature_type)
+            elif process_method == "pretrain":
+                features = pretrained_feature(
+                    audio_file_path, feature_type, device, model
+                )
+            elif process_method == "raw":
+                features = mel_spectrogram(audio_file_path)
+            wav_global_test[i][j].append(features)
+    logging.info("test data have been processed")
     global_test_dataset = DatasetGenerator(wav_global_test[0])
     test_data_global = data.DataLoader(
         dataset=global_test_dataset,
@@ -163,3 +183,4 @@ if __name__ == "__main__":
     ]
     save_data_path = "../../data/speech_commands/processed_dataset.p"
     pickle.dump(dataset, open(save_data_path, "wb"))
+    print('data finished')

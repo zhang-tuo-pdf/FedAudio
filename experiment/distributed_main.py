@@ -26,6 +26,7 @@ from data_loading.data_loader.gcommand_loader import load_partition_data_audio
 from model.vgg_speech import VGG
 from model.LeNet import LeNet
 from model.bc_resnet import BCResNet
+from model.conv_model import audio_conv_rnn
 from trainers.speech_trainer import MyModelTrainer
 from FedML.fedml_api.distributed.fedavg.FedAvgAPI import (
     FedML_init,
@@ -44,7 +45,7 @@ def add_args(parser):
     parser.add_argument(
         "--model",
         type=str,
-        default="BC_ResNet",
+        default="audio_conv_rnn",
         metavar="N",
         help="neural network used in training",
     )
@@ -185,6 +186,7 @@ def load_data(args, dataset_name):
     if dataset_name == "gcommand":
         load_file_path = "../data/speech_commands/processed_dataset.p"
         dataset = pickle.load(open(load_file_path, "rb"))
+        logging.info("dataset has been loaded from saved file")
     #     data_loader = load_partition_data_audio
     #     (
     #         train_data_num,
@@ -223,6 +225,8 @@ def create_model(args):
         model = VGG(args.model)
     if args.model == "LeNet":
         model = LeNet()
+    if args.model == "audio_conv_rnn":
+        model = audio_conv_rnn(pred='commands', audio_size=512, dropout=0.1, label_size=35)
     elif args.model == "BC_ResNet":
         model = BCResNet()
     return model
@@ -335,20 +339,20 @@ if __name__ == "__main__":
     model_trainer = custom_model_trainer(args, model)
     logging.info(model)
 
-    # # start "federated averaging (FedAvg)"
-    # fl_alg = get_fl_algorithm_initializer(args.fl_algorithm)
-    # fl_alg(
-    #     process_id,
-    #     worker_number,
-    #     device,
-    #     comm,
-    #     model,
-    #     train_data_num,
-    #     train_data_global,
-    #     test_data_global,
-    #     train_data_local_num_dict,
-    #     train_data_local_dict,
-    #     test_data_local_dict,
-    #     args,
-    #     model_trainer,
-    # )
+    # start "federated averaging (FedAvg)"
+    fl_alg = get_fl_algorithm_initializer(args.fl_algorithm)
+    fl_alg(
+        process_id,
+        worker_number,
+        device,
+        comm,
+        model,
+        train_data_num,
+        train_data_global,
+        test_data_global,
+        train_data_local_num_dict,
+        train_data_local_dict,
+        test_data_local_dict,
+        args,
+        model_trainer,
+    )
