@@ -42,9 +42,7 @@ class FedAVGTrainer(object):
 
     def train(self, round_idx=None):
         self.args.round_idx = round_idx
-        self.trainer.train(
-            self.train_local, self.device, self.args, round_idx, int(self.client_index)
-        )
+        self.trainer.train(self.train_local, self.device, self.args)
 
         weights = self.trainer.get_model_params()
 

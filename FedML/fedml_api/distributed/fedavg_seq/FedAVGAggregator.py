@@ -23,10 +23,8 @@ class FedAVGAggregator(object):
         device,
         args,
         model_trainer,
-        model,
     ):
         self.trainer = model_trainer
-        self.model = model
 
         self.args = args
         self.train_global = train_global
@@ -39,7 +37,6 @@ class FedAVGAggregator(object):
         self.train_data_local_num_dict = train_data_local_num_dict
 
         self.worker_num = worker_num
-        self.client_indexes = []
         self.device = device
         self.model_dict = dict()
         self.sample_num_dict = dict()
@@ -53,10 +50,10 @@ class FedAVGAggregator(object):
     def set_global_model_params(self, model_parameters):
         self.trainer.set_model_params(model_parameters)
 
-    def add_local_trained_result(self, index, model_params, sample_num):
+    def add_local_trained_result(self, index, model_params):
         logging.info("add_model. index = %d" % index)
         self.model_dict[index] = model_params
-        self.sample_num_dict[index] = sample_num
+        # self.sample_num_dict[index] = sample_num
         self.flag_client_model_uploaded_dict[index] = True
 
     def check_whether_all_receive(self):
@@ -68,6 +65,67 @@ class FedAVGAggregator(object):
             self.flag_client_model_uploaded_dict[idx] = False
         return True
 
+    def workload_estimate(self, client_indexes, mode="simulate"):
+        if mode == "simulate":
+            client_samples = [
+                self.train_data_local_num_dict[client_index]
+                for client_index in client_indexes
+            ]
+            workload = client_samples
+        elif mode == "real":
+            raise NotImplementedError
+        else:
+            raise NotImplementedError
+        return workload
+
+    def memory_estimate(self, client_indexes, mode="simulate"):
+        if mode == "simulate":
+            memory = np.ones(self.worker_num)
+        elif mode == "real":
+            raise NotImplementedError
+        else:
+            raise NotImplementedError
+        return memory
+
+    def resource_estimate(self, mode="simulate"):
+        if mode == "simulate":
+            resource = np.ones(self.worker_num)
+        elif mode == "real":
+            raise NotImplementedError
+        else:
+            raise NotImplementedError
+        return resource
+
+    def record_client_runtime(self, worker_id, client_runtimes):
+        pass
+
+    def client_schedule(self, round_idx, client_indexes, mode="simulate"):
+        # scheduler(workloads, constraints, memory)
+        # workload = self.workload_estimate(client_indexes, mode)
+        # resource = self.resource_estimate(mode)
+        # memory = self.memory_estimate(mode)
+
+        # mode = 0
+        # my_scheduler = scheduler(workload, resource, memory)
+        # schedules = my_scheduler.DP_schedule(mode)
+        # for i in range(len(schedules)):
+        #     print("Resource %2d: %s\n" % (i, str(schedules[i])))
+
+        client_schedule = np.array_split(client_indexes, self.worker_num)
+        return client_schedule
+
+    def get_average_weight(self, client_indexes):
+        average_weight_dict = {}
+        training_num = 0
+        for client_index in client_indexes:
+            training_num += self.train_data_local_num_dict[client_index]
+
+        for client_index in client_indexes:
+            average_weight_dict[client_index] = (
+                self.train_data_local_num_dict[client_index] / training_num
+            )
+        return average_weight_dict
+
     def aggregate(self):
         start_time = time.time()
         model_list = []
@@ -76,21 +134,29 @@ class FedAVGAggregator(object):
         for idx in range(self.worker_num):
             if self.args.is_mobile == 1:
                 self.model_dict[idx] = transform_list_to_tensor(self.model_dict[idx])
-            model_list.append((self.sample_num_dict[idx], self.model_dict[idx]))
-            training_num += self.sample_num_dict[idx]
 
+            # added for attack & defense; enable multiple defenses
+            # if FedMLDefender.get_instance().is_defense_enabled():
+            #     self.model_dict[idx] = FedMLDefender.get_instance().defend(
+            #         self.model_dict[idx], self.get_global_model_params()
+            #     )
+
+            # model_list.append((self.sample_num_dict[idx], self.model_dict[idx]))
+            model_list.append(self.model_dict[idx])
+            # training_num += self.sample_num_dict[idx]
         logging.info("len of self.model_dict[idx] = " + str(len(self.model_dict)))
 
         # logging.info("################aggregate: %d" % len(model_list))
-        (num0, averaged_params) = model_list[0]
+        # (num0, averaged_params) = model_list[0]
+        averaged_params = model_list[0]
         for k in averaged_params.keys():
             for i in range(0, len(model_list)):
-                local_sample_number, local_model_params = model_list[i]
-                w = local_sample_number / training_num
+                local_model_params = model_list[i]
+                # w = local_sample_number / training_num
                 if i == 0:
-                    averaged_params[k] = local_model_params[k] * w
+                    averaged_params[k] = local_model_params[k]
                 else:
-                    averaged_params[k] += local_model_params[k] * w
+                    averaged_params[k] += local_model_params[k]
 
         # update the global model which is cached at the server side
         self.set_global_model_params(averaged_params)
@@ -113,7 +179,6 @@ class FedAVGAggregator(object):
                 range(client_num_in_total), num_clients, replace=False
             )
         logging.info("client_indexes = %s" % str(client_indexes))
-        self.client_indexes = client_indexes
         return client_indexes
 
     def _generate_validation_set(self, num_samples=10000):
@@ -136,7 +201,6 @@ class FedAVGAggregator(object):
             self.test_data_local_dict,
             self.device,
             self.args,
-            round_idx,
         ):
             return
 
@@ -147,30 +211,30 @@ class FedAVGAggregator(object):
             logging.info(
                 "################test_on_server_for_all_clients : {}".format(round_idx)
             )
-            # train_num_samples = []
-            # train_tot_corrects = []
-            # train_losses = []
-            # for client_idx in self.client_indexes:
+            train_num_samples = []
+            train_tot_corrects = []
+            train_losses = []
+            # for client_idx in range(self.args.client_num_in_total):
             #     # train data
-            #     metrics = self.trainer.test(self.train_data_local_dict[client_idx], self.device, self.args)
-            #     train_tot_correct, train_num_sample, train_loss = metrics['test_correct'], metrics['test_total'], metrics['test_loss']
+            #     metrics = self.trainer.test(
+            #         self.train_data_local_dict[client_idx], self.device, self.args
+            #     )
+            #     train_tot_correct, train_num_sample, train_loss = (
+            #         metrics["test_correct"],
+            #         metrics["test_total"],
+            #         metrics["test_loss"],
+            #     )
             #     train_tot_corrects.append(copy.deepcopy(train_tot_correct))
             #     train_num_samples.append(copy.deepcopy(train_num_sample))
             #     train_losses.append(copy.deepcopy(train_loss))
-            #
-            #     """
-            #     Note: CI environment is CPU-based computing.
-            #     The training speed for RNN training is to slow in this setting, so we only test a client to make sure there is no programming error.
-            #     """
-            #     if self.args.ci == 1:
-            #         break
 
-            # # test on training dataset
+            # test on training dataset
             # train_acc = sum(train_tot_corrects) / sum(train_num_samples)
             # train_loss = sum(train_losses) / sum(train_num_samples)
-            # wandb.log({"Train/Acc": train_acc, "round": round_idx})
-            # wandb.log({"Train/Loss": train_loss, "round": round_idx})
-            # stats = {'training_acc': train_acc, 'training_loss': train_loss}
+            # if self.args.enable_wandb:
+            #     wandb.log({"Train/Acc": train_acc, "round": round_idx})
+            #     wandb.log({"Train/Loss": train_loss, "round": round_idx})
+            # stats = {"training_acc": train_acc, "training_loss": train_loss}
             # logging.info(stats)
 
             # test data
@@ -178,10 +242,10 @@ class FedAVGAggregator(object):
             test_tot_corrects = []
             test_losses = []
 
-            # if round_idx == self.args.comm_round - 1:
-            metrics = self.trainer.test(self.test_global, self.device, self.args)
-            # else:
-            #     metrics = self.trainer.test(self.val_global, self.device, self.args)
+            if round_idx == self.args.comm_round - 1:
+                metrics = self.trainer.test(self.test_global, self.device, self.args)
+            else:
+                metrics = self.trainer.test(self.val_global, self.device, self.args)
 
             test_tot_correct, test_num_sample, test_loss = (
                 metrics["test_correct"],
@@ -195,8 +259,8 @@ class FedAVGAggregator(object):
             # test on test dataset
             test_acc = sum(test_tot_corrects) / sum(test_num_samples)
             test_loss = sum(test_losses) / sum(test_num_samples)
-            wandb.log({"Test/Acc": test_acc, "round": round_idx})
-            wandb.log({"Test/Loss": test_loss, "round": round_idx})
+            if self.args.enable_wandb:
+                wandb.log({"Test/Acc": test_acc, "round": round_idx})
+                wandb.log({"Test/Loss": test_loss, "round": round_idx})
             stats = {"test_acc": test_acc, "test_loss": test_loss}
             logging.info(stats)
-            logging.info(round_idx)
