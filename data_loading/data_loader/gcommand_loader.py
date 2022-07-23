@@ -26,7 +26,7 @@ def load_partition_data_audio(
     device_ratio=None,
 ):
 
-    folder_path = "/home/ultraz/Project/FedSpeech22/data/speech_commands"
+    folder_path = os.path.join(os.getcwd(), "..", "..", "data/speech_commands")
     train_path = os.path.join(folder_path, "train_training")
     test_path = os.path.join(folder_path, "train_testing")
 
@@ -38,7 +38,7 @@ def load_partition_data_audio(
     if fl_feature:
         logging.info("add federated learning related features")
         output_folder = (
-            "/home/ultraz/Project/FedSpeech22/data/speech_commands/fl_dataset/"
+            os.path.join(folder_path, "fl_dataset/")
         )
         if not os.path.isdir(output_folder):
             # step 1 create fl dataset
@@ -149,7 +149,7 @@ def load_partition_data_audio(
 if __name__ == "__main__":
     # step 0 train data split
     batch_size = 16
-    process_method = "pretrain"
+    process_method = "raw"
     feature_type = "apc"
     fl_feature = True
     snr_level = [20, 30, 40]
