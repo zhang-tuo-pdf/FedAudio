@@ -202,20 +202,30 @@ class audio_conv_rnn(nn.Module):
                 m.bias.data.fill_(0.01)
 
     def forward(self, audio, lengths=None):
+        # # conv module
+        # audio = self.conv(audio.float().permute(0, 2, 1))
+        # audio = audio.permute(0, 2, 1)
+        # if lengths is None:
+        #     # output
+        #     z = torch.mean(audio, dim=1)
+        # else:
+        #     # rnn module
+        #     audio_packed = pack_padded_sequence(audio, lengths.cpu(), batch_first=True, enforce_sorted=False)
+        #     output_packed, _ = self.rnn(audio_packed)
+        #     x_output, _ = pad_packed_sequence(output_packed, True, total_length=audio.size(1))
+            
+        # # pooling based on the real sequence length
+        # z = torch.sum(x_output, dim=1) / torch.unsqueeze(lengths, 1)
+        # preds = self.pred_layer(z)
+        # return preds
+        
         # conv module
         audio = self.conv(audio.float().permute(0, 2, 1))
         audio = audio.permute(0, 2, 1)
-        if lengths is None:
-            # output
-            z = torch.mean(audio, dim=1)
-        else:
-            # rnn module
-            audio_packed = pack_padded_sequence(audio, lengths.cpu(), batch_first=True, enforce_sorted=False)
-            output_packed, _ = self.rnn(audio_packed)
-            x_output, _ = pad_packed_sequence(output_packed, True, total_length=audio.size(1))
+        x_output, _ = self.rnn(audio)
             
         # pooling based on the real sequence length
-        z = torch.sum(x_output, dim=1) / torch.unsqueeze(lengths, 1)
+        z = torch.mean(x_output, dim=1)
         preds = self.pred_layer(z)
         return preds
     
