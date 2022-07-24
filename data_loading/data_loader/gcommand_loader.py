@@ -4,6 +4,7 @@ import logging
 import pickle
 from tqdm import tqdm
 from pathlib import Path
+import argparse
 import torch.utils.data as data
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
@@ -73,7 +74,10 @@ def load_partition_data_audio(
         device, model = load_model(feature_type)
     for i in tqdm(range(len(wav_train_data_dict))):
         for j in range(len(wav_train_data_dict[i])):
-            audio_file_path = wav_train_data_dict[i][j][1]
+            if fl_feature:
+                audio_file_path = wav_train_data_dict[i][j][1]
+            else:
+                audio_file_path = "../" + wav_train_data_dict[i][j][1]
             if process_method == "opensmile_feature":
                 features = opensmile_feature(audio_file_path, feature_type)
             elif process_method == "pretrain":
@@ -148,10 +152,27 @@ def load_partition_data_audio(
 
 if __name__ == "__main__":
     # step 0 train data split
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--raw_data_path', type=str, default='../../data/speech_commands/audio', help='Raw data path of speech_commands data set'
+    )
+    
+    parser.add_argument(
+        '--output_data_path', type=str, default='../../data/speech_commands', help='Output path of speech_commands data set'
+    )
+    
+    parser.add_argument(
+        '--process_method', type=str, default='raw', help='Process method: pretrain; raw; opensmile_feature'
+    )
+    
+    parser.add_argument(
+        '--feature_type', type=str, default='mel_spec', help='Feature type based on the process_method method'
+    )
+    args = parser.parse_args()
+
     batch_size = 16
-    process_method = "raw"
-    feature_type = "apc"
-    fl_feature = True
+    fl_feature = False
     snr_level = [20, 30, 40]
     device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
     (
@@ -165,8 +186,8 @@ if __name__ == "__main__":
         class_num,
     ) = load_partition_data_audio(
         batch_size,
-        process_method,
-        feature_type=feature_type,
+        args.process_method,
+        feature_type=args.feature_type,
         fl_feature=fl_feature,
         snr_level=snr_level,
         device_ratio=device_ratio,
@@ -181,6 +202,8 @@ if __name__ == "__main__":
         test_data_local_dict,
         class_num,
     ]
-    save_data_path = "../../data/speech_commands/processed_dataset.p"
+ 
+    save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'.p'
+    save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')
