@@ -9,7 +9,7 @@ audio_feat_dim_dict = {
         "emobase":      968
     },
     
-    "opensmile": {
+    "raw": {
         "mel_spec":     128
     }
 }

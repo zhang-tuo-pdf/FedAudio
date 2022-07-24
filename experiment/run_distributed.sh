@@ -1,25 +1,27 @@
 #!/usr/bin/env bash
 DATA_SET=$1
-CLIENT_NUM=$2
-SAMPLE_NUM=$3
-WORKER_NUM=$4
-ROUND=$5
-EPOCH=$6
-BATCH_SIZE=$7
-LR=$8
-STARTING_GPU_INDEX=$9
-GPU_NUM_PER_SERVER=${10}
+PROCESS_METHOD=$2
+FEATURE_TYPE=$3
+SAMPLE_NUM=$4
+WORKER_NUM=$5
+ROUND=$6
+EPOCH=$7
+BATCH_SIZE=$8
+LR=$9
+STARTING_GPU_INDEX=${10}
+GPU_NUM_PER_SERVER=${11}
 
 PROCESS_NUM=`expr $WORKER_NUM + 1`
 echo $PROCESS_NUM
 
 hostname > mpi_host_file
 
-# sh run_distributed.sh 2118 10 8 30 1 16 0.1 0 8
+# sh run_distributed.sh gcommand 2118 10 8 30 1 16 0.1 0 8
 
 mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./distributed_main.py \
   --dataset $DATA_SET \
-  --client_num_in_total $CLIENT_NUM \
+  --process_method $PROCESS_METHOD \
+  --feature_type $FEATURE_TYPE \
   --client_num_per_round $SAMPLE_NUM \
   --gpu_worker_num $WORKER_NUM \
   --comm_round $ROUND \

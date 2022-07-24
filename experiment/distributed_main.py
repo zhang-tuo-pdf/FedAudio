@@ -64,7 +64,7 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        "--data_dir", type=str, default="../data/speech_commands", help="data directory"
+        "--data_dir", type=str, default="../data/", help="data directory"
     )
 
     parser.add_argument(
@@ -152,14 +152,14 @@ def add_args(parser):
     parser.add_argument(
         "--process_method",
         type=str,
-        default="pretrain",
+        default="raw",
         help="the feature process method",
     )
     
     parser.add_argument(
         "--feature_type",
         type=str,
-        default="apc",
+        default="mel_spec",
         help="the feature type",
     )
 
@@ -215,49 +215,15 @@ def validate_args(args):
     
 
 def load_data(args, dataset_name):
-    # process_method = "pretrain"
-    # feature_type = "apc"
-    # fl_feature = True
-    # snr_level = [20, 30, 40]
-    # device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
     if dataset_name == "gcommand":
-        load_file_path = "../data/speech_commands/processed_dataset.p"
+        save_file_name = 'speech_commands/processed_dataset_'+args.process_method+'_'+args.feature_type+'.p'
+        load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
     elif dataset_name == "iemocap":
         load_file_path = "../data/iemocap/processed_dataset_pretrain_apc_Session1.p"
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info(dataset_name + " dataset has been loaded from saved file")
-        
-    #     data_loader = load_partition_data_audio
-    #     (
-    #         train_data_num,
-    #         test_data_num,
-    #         train_data_global,
-    #         test_data_global,
-    #         train_data_local_num_dict,
-    #         train_data_local_dict,
-    #         test_data_local_dict,
-    #         class_num,
-    #     ) = data_loader(
-    #         args.batch_size,
-    #         process_method,
-    #         feature_type=feature_type,
-    #         fl_feature=fl_feature,
-    #         snr_level=snr_level,
-    #         device_ratio=device_ratio,
-    #     )
-    #
-    # dataset = [
-    #     train_data_num,
-    #     test_data_num,
-    #     train_data_global,
-    #     test_data_global,
-    #     train_data_local_num_dict,
-    #     train_data_local_dict,
-    #     test_data_local_dict,
-    #     class_num,
-    # ]
     return dataset
 
 
@@ -386,10 +352,11 @@ if __name__ == "__main__":
         test_data_local_dict,
         class_num,
     ] = dataset
+    #fix client number by naturally niid
+    args.client_num_in_total = len(train_data_local_num_dict)
     model = create_model(args)
     model_trainer = custom_model_trainer(args, model)
     logging.info(model)
-
     # start "federated averaging (FedAvg)"
     fl_alg = get_fl_algorithm_initializer(args.fl_algorithm)
     fl_alg(
