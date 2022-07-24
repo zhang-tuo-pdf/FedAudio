@@ -318,8 +318,8 @@ if __name__ == "__main__":
     if process_id == 0:
         wandb.init(
             # mode="disabled",
-            project="fedspeech",
-            entity="ultraz",
+            project="fedaudio",
+            entity="ultrazt",
             name=str(args.fl_algorithm)
             + "-r"
             + str(args.comm_round)
