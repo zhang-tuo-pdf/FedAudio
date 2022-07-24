@@ -34,3 +34,16 @@ python3 crema_d_loader.py --raw_data_path DATA_PATH \
 ```
 Output data format:
 [key, wav_crema_d, emotion_id, data]
+
+## UrbanSound8K Loaders
+```
+python3 urbansound_loader.py --raw_data_path DATA_PATH \
+                          --output_data_path OUTPUT_PATH \
+                          --num_clients NUM \
+                          --process_method raw \
+                          --feature_type mel_spec \
+                          --test_fold 1/2/3/4/5/6/7/8/9/10
+
+```
+Output data format:
+[key, wav_urbansound, event_id, data]
