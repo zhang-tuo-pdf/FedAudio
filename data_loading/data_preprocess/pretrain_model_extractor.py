@@ -18,16 +18,17 @@ def pretrained_feature(audio_file_path, feature_type, device, model):
     audio, sample_rate = torchaudio.load(audio_file_path)
     transform_model = torchaudio.transforms.Resample(sample_rate, 16000)
     audio = transform_model(audio).to(device)
-
-    if (
-        feature_type == "distilhubert"
-        or feature_type == "wav2vec2"
-        or feature_type == "vq_wav2vec"
-        or feature_type == "cpc"
-    ):
-        features = model([audio[0]])["last_hidden_state"].detach().cpu().numpy()
-    else:
-        features = model(audio)["last_hidden_state"].detach().cpu().numpy()
+    
+    with torch.no_grad():
+        if (
+            feature_type == "distilhubert"
+            or feature_type == "wav2vec2"
+            or feature_type == "vq_wav2vec"
+            or feature_type == "cpc"
+        ):
+            features = model([audio[0]])["last_hidden_state"].detach().cpu().numpy()
+        else:
+            features = model(audio)["last_hidden_state"].detach().cpu().numpy()
     return features[0]
 
 
