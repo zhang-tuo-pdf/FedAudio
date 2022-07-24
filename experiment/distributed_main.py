@@ -7,19 +7,22 @@ import sys
 import pickle
 
 import numpy as np
-import psutil
-import setproctitle
 import torch
-import dill
 import wandb
 from tqdm import tqdm
 
 # add the FedML root directory to the python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_loader")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_preprocess")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_split")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_loader"))
+)
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_preprocess"))
+)
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_split"))
+)
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
 
 from data_loading.data_loader import global_constant
@@ -148,14 +151,14 @@ def add_args(parser):
         default=5,
         help="the frequency of the algorithms",
     )
-    
+
     parser.add_argument(
         "--process_method",
         type=str,
         default="raw",
         help="the feature process method",
     )
-    
+
     parser.add_argument(
         "--feature_type",
         type=str,
@@ -205,18 +208,34 @@ def validate_args(args):
     # Check feature match or not
     if args.process_method not in global_constant.audio_feat_dim_dict:
         raise Exception("Process method not found for " + args.dataset)
-    if args.feature_type not in global_constant.audio_feat_dim_dict[args.process_method]:
-        raise Exception("Feature type not found for " + args.dataset + " using " + args.process_method)
-    
+    if (
+        args.feature_type
+        not in global_constant.audio_feat_dim_dict[args.process_method]
+    ):
+        raise Exception(
+            "Feature type not found for "
+            + args.dataset
+            + " using "
+            + args.process_method
+        )
+
     # Training settings possible or not
     if args.dataset == "iemocap":
         if int(args.client_num_in_total) != 8:
-            raise Exception("Total number of clients does not match with " + args.dataset)
-    
+            raise Exception(
+                "Total number of clients does not match with " + args.dataset
+            )
+
 
 def load_data(args, dataset_name):
     if dataset_name == "gcommand":
-        save_file_name = 'speech_commands/processed_dataset_'+args.process_method+'_'+args.feature_type+'.p'
+        save_file_name = (
+            "speech_commands/processed_dataset_"
+            + args.process_method
+            + "_"
+            + args.feature_type
+            + ".p"
+        )
         load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
@@ -234,11 +253,17 @@ def create_model(args):
     if args.model == "LeNet":
         model = LeNet()
     if args.model == "audio_conv_rnn":
-        feature_size = global_constant.audio_feat_dim_dict[args.process_method][args.feature_type]
+        feature_size = global_constant.audio_feat_dim_dict[args.process_method][
+            args.feature_type
+        ]
         label_size = global_constant.label_dim_dict[args.dataset]
-        model = audio_conv_rnn(feature_size=feature_size, dropout=0.1, label_size=label_size)
+        model = audio_conv_rnn(
+            feature_size=feature_size, dropout=0.1, label_size=label_size
+        )
     elif args.model == "audio_rnn":
-        feature_size = global_constant.audio_feat_dim_dict[args.process_method][args.feature_type]
+        feature_size = global_constant.audio_feat_dim_dict[args.process_method][
+            args.feature_type
+        ]
         label_size = global_constant.label_dim_dict[args.dataset]
         model = audio_rnn(feature_size=feature_size, dropout=0.1, label_size=label_size)
     elif args.model == "BC_ResNet":
@@ -352,11 +377,15 @@ if __name__ == "__main__":
         test_data_local_dict,
         class_num,
     ] = dataset
-    #fix client number by naturally niid
+
+    # fix client number by naturally niid
     args.client_num_in_total = len(train_data_local_num_dict)
+
+    # load model and trainer
     model = create_model(args)
     model_trainer = custom_model_trainer(args, model)
     logging.info(model)
+
     # start "federated averaging (FedAvg)"
     fl_alg = get_fl_algorithm_initializer(args.fl_algorithm)
     fl_alg(

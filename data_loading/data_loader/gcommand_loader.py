@@ -38,9 +38,7 @@ def load_partition_data_audio(
 
     if fl_feature:
         logging.info("add federated learning related features")
-        output_folder = (
-            os.path.join(folder_path, "fl_dataset/")
-        )
+        output_folder = os.path.join(folder_path, "fl_dataset/")
         if not os.path.isdir(output_folder):
             # step 1 create fl dataset
             logging.info("create federated learning dataset")
@@ -109,7 +107,7 @@ def load_partition_data_audio(
 
     train_data_global = None
 
-    #test dataset
+    # test dataset
     wav_global_test, class_num = audio_partition(test_path)
     # step 2 preprocess data
     logging.info("begin test data preprocess")
@@ -155,19 +153,31 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--raw_data_path', type=str, default='../../data/speech_commands/audio', help='Raw data path of speech_commands data set'
+        "--raw_data_path",
+        type=str,
+        default="../../data/speech_commands/audio",
+        help="Raw data path of speech_commands data set",
     )
-    
+
     parser.add_argument(
-        '--output_data_path', type=str, default='../../data/speech_commands', help='Output path of speech_commands data set'
+        "--output_data_path",
+        type=str,
+        default="../../data/speech_commands",
+        help="Output path of speech_commands data set",
     )
-    
+
     parser.add_argument(
-        '--process_method', type=str, default='raw', help='Process method: pretrain; raw; opensmile_feature'
+        "--process_method",
+        type=str,
+        default="raw",
+        help="Process method: pretrain; raw; opensmile_feature",
     )
-    
+
     parser.add_argument(
-        '--feature_type', type=str, default='mel_spec', help='Feature type based on the process_method method'
+        "--feature_type",
+        type=str,
+        default="mel_spec",
+        help="Feature type based on the process_method method",
     )
     args = parser.parse_args()
 
@@ -202,8 +212,10 @@ if __name__ == "__main__":
         test_data_local_dict,
         class_num,
     ]
- 
-    save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'.p'
+
+    save_file_name = (
+        "processed_dataset_" + args.process_method + "_" + args.feature_type + ".p"
+    )
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
-    print('data finished')
+    print("data finished")

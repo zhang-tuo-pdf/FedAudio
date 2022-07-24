@@ -18,7 +18,7 @@ def pretrained_feature(audio_file_path, feature_type, device, model):
     audio, sample_rate = torchaudio.load(audio_file_path)
     transform_model = torchaudio.transforms.Resample(sample_rate, 16000)
     audio = transform_model(audio).to(device)
-    
+
     with torch.no_grad():
         if (
             feature_type == "distilhubert"
