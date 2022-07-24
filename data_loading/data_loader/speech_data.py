@@ -13,8 +13,8 @@ class DatasetGenerator:
         return len(self.dataset)
 
     def __getitem__(self, item):
-        data = self.dataset[item][3][0]
         label = self.dataset[item][2]
+        data = self.dataset[item][3]
         return torch.tensor(data), torch.tensor(int(label))
 
 

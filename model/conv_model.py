@@ -7,8 +7,6 @@ from torch.nn.utils.rnn import pack_padded_sequence
 from torch.nn.utils.rnn import pad_packed_sequence
 
 import pdb
-emo_dict = {0: 'neu', 1: 'hap', 2: 'sad', 3: 'ang'}
-class_dict = {'emotion': 4, 'affect': 3, 'gender': 2}
 
 class conv_classifier(nn.Module):
     def __init__(self, pred, audio_size, txt_size, hidden_size, att=None):
@@ -166,11 +164,9 @@ class audio_conv(nn.Module):
     
 
 class audio_conv_rnn(nn.Module):
-    def __init__(self, pred, audio_size, dropout, label_size=4):
+    def __init__(self, feature_size, dropout, label_size=4):
         super(audio_conv_rnn, self).__init__()
         self.dropout_p = dropout
-        # self.rnn_cell = nn.GRU
-        
         self.pred_layer = nn.Sequential(
             nn.Linear(128, 64),
             nn.ReLU(),
@@ -178,18 +174,21 @@ class audio_conv_rnn(nn.Module):
         )
         
         self.conv = nn.Sequential(
-            nn.Conv1d(audio_size, 64, kernel_size=3, padding=1),
+            nn.Conv1d(feature_size, 32, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(2),
-            nn.Conv1d(64, 128, kernel_size=3, padding=1),
+            nn.Conv1d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(2),
             nn.Dropout(self.dropout_p),
         )
         
-        # self.rnn = self.rnn_cell(input_size=64, hidden_size=64, 
-        #                          num_layers=1, batch_first=True, 
-        #                          dropout=self.dropout_p, bidirectional=True).cuda()
+        self.rnn = nn.GRU(input_size=64, 
+                          hidden_size=64, 
+                          num_layers=1, 
+                          batch_first=True,
+                          dropout=self.dropout_p, 
+                          bidirectional=True).cuda()
         
         self.init_weight()
 
@@ -203,24 +202,19 @@ class audio_conv_rnn(nn.Module):
                 m.bias.data.fill_(0.01)
 
     def forward(self, audio, lengths=None):
-
-        # conv modul
+        # conv module
         audio = self.conv(audio.float().permute(0, 2, 1))
         audio = audio.permute(0, 2, 1)
-        '''
         if lengths is None:
             # output
-            # x_output, _ = self.rnn(audio)
             z = torch.mean(audio, dim=1)
         else:
-            # rnn modul
-            audio_packed = pack_padded_sequence(audio, lengths.cpu(), batch_first=True, enforce_sorted=False)
-            output_packed, h_state = self.rnn(audio_packed)
+            # rnn module
+            audio_packed = pack_padded_sequence(audio, torch.div(lengths.cpu(), 4).type(torch.IntTensor), batch_first=True, enforce_sorted=False)
+            output_packed, _ = self.rnn(audio_packed)
             x_output, _ = pad_packed_sequence(output_packed, True, total_length=audio.size(1))
-        '''
-        
-        # output
-        z = torch.sum(audio, dim=1) / torch.unsqueeze(lengths, 1)
+            
+        # pooling based on the real sequence length
+        z = torch.sum(x_output, dim=1) / torch.unsqueeze(lengths, 1)
         preds = self.pred_layer(z)
-        preds = torch.log_softmax(preds, dim=1)
         return preds

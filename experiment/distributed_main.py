@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/da
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../data_loading/data_split")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
 
-from data_loading.data_loader.gcommand_loader import load_partition_data_audio
+from data_loading.data_loader import global_constant
 from model.vgg_speech import VGG
 from model.LeNet import LeNet
 from model.bc_resnet import BCResNet
@@ -147,6 +147,20 @@ def add_args(parser):
         default=5,
         help="the frequency of the algorithms",
     )
+    
+    parser.add_argument(
+        "--process_method",
+        type=str,
+        default="pretrain",
+        help="the feature process method",
+    )
+    
+    parser.add_argument(
+        "--feature_type",
+        type=str,
+        default="apc",
+        help="the feature type",
+    )
 
     parser.add_argument("--gpu_server_num", type=int, default=1, help="gpu_server_num")
 
@@ -183,6 +197,22 @@ def add_args(parser):
     return args
 
 
+def validate_args(args):
+    """
+    args : args for Fed Speech
+    """
+    # Check feature match or not
+    if args.process_method not in global_constant.audio_feat_dim_dict:
+        raise Exception("Process method not found for " + args.dataset)
+    if args.feature_type not in global_constant.audio_feat_dim_dict[args.process_method]:
+        raise Exception("Feature type not found for " + args.dataset + " using " + args.process_method)
+    
+    # Training settings possible or not
+    if args.dataset == "iemocap":
+        if int(args.client_num_in_total) != 8:
+            raise Exception("Total number of clients does not match with " + args.dataset)
+    
+
 def load_data(args, dataset_name):
     # process_method = "pretrain"
     # feature_type = "apc"
@@ -193,6 +223,11 @@ def load_data(args, dataset_name):
         load_file_path = "../data/speech_commands/processed_dataset.p"
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
+    elif dataset_name == "iemocap":
+        load_file_path = "../data/iemocap/processed_dataset_test_session_Session1.p"
+        dataset = pickle.load(open(load_file_path, "rb"))
+        logging.info(dataset_name + " dataset has been loaded from saved file")
+        
     #     data_loader = load_partition_data_audio
     #     (
     #         train_data_num,
@@ -232,7 +267,9 @@ def create_model(args):
     if args.model == "LeNet":
         model = LeNet()
     if args.model == "audio_conv_rnn":
-        model = audio_conv_rnn(pred='commands', audio_size=512, dropout=0.1, label_size=35)
+        feature_size = global_constant.audio_feat_dim_dict[args.process_method][args.feature_type]
+        label_size = global_constant.label_dim_dict[args.dataset]
+        model = audio_conv_rnn(feature_size=feature_size, dropout=0.1, label_size=label_size)
     elif args.model == "BC_ResNet":
         model = BCResNet()
     return model
@@ -279,6 +316,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     args = add_args(argparse.ArgumentParser(description="FedSpeech-Distributed"))
+    validate_args(args)
     logger.info(args)
 
     if process_id == 0:

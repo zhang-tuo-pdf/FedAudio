@@ -164,11 +164,25 @@ def load_partition_data_audio(
 if __name__ == "__main__":
     # step 0 train data split
     parser = argparse.ArgumentParser()
-    parser.add_argument('--raw_data_path', type=str, default='../../data/iemocap', help='Raw data path of IEMOCAP data set')
-    parser.add_argument('--output_data_path', type=str, default='../../data/iemocap', help='Output path of IEMOCAP data set')
-    parser.add_argument('--process_method', type=str, default='pretrain', help='Process method: pretrain; raw; opensmile_feature')
-    parser.add_argument('--feature_type', type=str, default='apc', help='Feature type based on the process_method method')
-    parser.add_argument('--test_session', type=str, default='Session1', help='Test session id for IEMOCAP dataset, default test fold is Session1')
+    parser.add_argument(
+        '--raw_data_path', type=str, default='../../data/iemocap', help='Raw data path of IEMOCAP data set'
+    )
+    
+    parser.add_argument(
+        '--output_data_path', type=str, default='../../data/iemocap', help='Output path of IEMOCAP data set'
+    )
+    
+    parser.add_argument(
+        '--process_method', type=str, default='pretrain', help='Process method: pretrain; raw; opensmile_feature'
+    )
+    
+    parser.add_argument(
+        '--feature_type', type=str, default='apc', help='Feature type based on the process_method method'
+    )
+    
+    parser.add_argument(
+        '--test_session', type=str, default='Session1', help='Test session id for IEMOCAP dataset, default test fold is Session1'
+    )
     args = parser.parse_args()
     
     if not Path(args.raw_data_path).exists(): 
