@@ -317,10 +317,11 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            mode="disabled",
+            # mode="disabled",
             project="fedspeech",
             entity="ultraz",
-            name="FedAVG-r-new"
+            name=str(args.fl_algorithm)
+            + "-r"
             + str(args.comm_round)
             + "-e"
             + str(args.epochs)
@@ -328,12 +329,14 @@ if __name__ == "__main__":
             + str(args.lr)
             + "-bs"
             + str(args.batch_size)
-            + "-c"
-            + str(args.client_num_in_total)
             + "-"
             + args.model
             + "-"
-            + args.dataset,
+            + args.dataset
+            + "-"
+            + args.process_method
+            + "-"
+            + args.feature_type,
             config=args,
         )
 
