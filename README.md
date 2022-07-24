@@ -21,8 +21,8 @@ python gcommand_loader.py
 step 2: run the fl training
 ```
 cd experiment
-sh run_distributed.sh 2118 10 30 1 16 0.1 0 8
-#total client number, sampled client number, round number, local epoch number, batch size, lr, start gpu, total gpu
+sh run_distributed.sh gcommand 2118 10 8 30 1 16 0.1 0 8
+# dataset name, total client number, sampled client number, gpu number, round number, local epoch number, batch size, lr, start gpu, total gpu
 ```
 
 # Dataset
