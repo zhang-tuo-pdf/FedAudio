@@ -188,7 +188,7 @@ class audio_conv_rnn(nn.Module):
                           num_layers=1, 
                           batch_first=True,
                           dropout=self.dropout_p, 
-                          bidirectional=True).cuda()
+                          bidirectional=True)
         
         self.init_weight()
 

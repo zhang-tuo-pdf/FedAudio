@@ -17,7 +17,7 @@ audio_feat_dim_dict = {
 """ Label dim dictionary """
 label_dim_dict = {
     'iemocap':      4,
-    'gcommand':     35,
+    'gcommand':     36,
     'cream-d':      4,
     'meld':         3,
     'urban-sound':  10
