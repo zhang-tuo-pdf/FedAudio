@@ -28,7 +28,7 @@ def pretrained_feature(audio_file_path, feature_type, device, model):
         features = model([audio[0]])["last_hidden_state"].detach().cpu().numpy()
     else:
         features = model(audio)["last_hidden_state"].detach().cpu().numpy()
-    return features
+    return features[0]
 
 
 if __name__ == "__main__":

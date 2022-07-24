@@ -3,11 +3,10 @@ from tqdm import tqdm
 from pathlib import Path
 
 
-def audio_partition(folder_path, test_session='Session1'):
+def audio_partition(folder_path, test_session='Session1', split='train'):
     
     class_to_id = {label: i for i, label in enumerate(['neu', 'hap', 'sad', 'ang'])}
     wav_data_dict = dict()
-    wav_data_dict[0] = list()
     
     # split the data by speaker
     for session_id in ['Session1', 'Session2', 'Session3', 'Session4', 'Session5']:
@@ -28,8 +27,12 @@ def audio_partition(folder_path, test_session='Session1'):
                     if label == 'exc': label = 'hap'
                     audio_file_path = Path(folder_path).joinpath(session_id, 'sentences', 'wav', '_'.join(key.split('_')[:-1]), key+'.wav')
                     wav_item = [key, str(audio_file_path), class_to_id[label]]
-                    if session_id == test_session: wav_data_dict[0].append(wav_item)
+                    if split == 'test':
+                        if session_id == test_session: 
+                            if speaker_id not in wav_data_dict: wav_data_dict[speaker_id] = list()
+                            wav_data_dict[speaker_id].append(wav_item)
                     else:
+                        if session_id == test_session: continue
                         if speaker_id not in wav_data_dict: wav_data_dict[speaker_id] = list()
                         wav_data_dict[speaker_id].append(wav_item)
     return wav_data_dict, len(class_to_id)
