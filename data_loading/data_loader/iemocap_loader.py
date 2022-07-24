@@ -177,7 +177,7 @@ if __name__ == "__main__":
     )
     
     parser.add_argument(
-        '--feature_type', type=str, default='apc', help='Feature type based on the process_method method'
+        '--feature_type', type=str, default='mel_spec', help='Feature type based on the process_method method'
     )
     
     parser.add_argument(
@@ -224,6 +224,7 @@ if __name__ == "__main__":
         test_data_local_dict,
         class_num,
     ]
-    save_data_path = Path(args.output_data_path).joinpath('processed_dataset_test_session_'+str(args.test_session)+'.p')
+    save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_'+str(args.test_session)+'.p'
+    save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')

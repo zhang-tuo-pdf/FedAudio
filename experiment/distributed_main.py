@@ -27,6 +27,7 @@ from model.vgg_speech import VGG
 from model.LeNet import LeNet
 from model.bc_resnet import BCResNet
 from model.conv_model import audio_conv_rnn
+from model.conv_model import audio_rnn
 from trainers.speech_trainer import MyModelTrainer
 from FedML.fedml_api.distributed.fedavg.FedAvgAPI import (
     FedML_init,
@@ -224,7 +225,7 @@ def load_data(args, dataset_name):
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
     elif dataset_name == "iemocap":
-        load_file_path = "../data/iemocap/processed_dataset_test_session_Session1.p"
+        load_file_path = "../data/iemocap/processed_dataset_pretrain_apc_Session1.p"
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info(dataset_name + " dataset has been loaded from saved file")
         
@@ -270,6 +271,10 @@ def create_model(args):
         feature_size = global_constant.audio_feat_dim_dict[args.process_method][args.feature_type]
         label_size = global_constant.label_dim_dict[args.dataset]
         model = audio_conv_rnn(feature_size=feature_size, dropout=0.1, label_size=label_size)
+    elif args.model == "audio_rnn":
+        feature_size = global_constant.audio_feat_dim_dict[args.process_method][args.feature_type]
+        label_size = global_constant.label_dim_dict[args.dataset]
+        model = audio_rnn(feature_size=feature_size, dropout=0.1, label_size=label_size)
     elif args.model == "BC_ResNet":
         model = BCResNet()
     return model

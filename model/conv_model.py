@@ -210,7 +210,51 @@ class audio_conv_rnn(nn.Module):
             z = torch.mean(audio, dim=1)
         else:
             # rnn module
-            audio_packed = pack_padded_sequence(audio, torch.div(lengths.cpu(), 4).type(torch.IntTensor), batch_first=True, enforce_sorted=False)
+            audio_packed = pack_padded_sequence(audio, lengths.cpu(), batch_first=True, enforce_sorted=False)
+            output_packed, _ = self.rnn(audio_packed)
+            x_output, _ = pad_packed_sequence(output_packed, True, total_length=audio.size(1))
+            
+        # pooling based on the real sequence length
+        z = torch.sum(x_output, dim=1) / torch.unsqueeze(lengths, 1)
+        preds = self.pred_layer(z)
+        return preds
+    
+    
+class audio_rnn(nn.Module):
+    def __init__(self, feature_size, dropout, label_size=4):
+        super(audio_rnn, self).__init__()
+        self.dropout_p = dropout
+        self.pred_layer = nn.Sequential(
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, label_size)
+        )
+        
+        self.rnn = nn.GRU(input_size=feature_size, 
+                          hidden_size=64, 
+                          num_layers=1, 
+                          batch_first=True,
+                          dropout=self.dropout_p, 
+                          bidirectional=True).cuda()
+        
+        self.init_weight()
+
+    def init_weight(self):
+        for m in self._modules:
+            if type(m) == nn.Linear:
+                nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
+                m.bias.data.fill_(0.01)
+            if type(m) == nn.Conv1d:
+                nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
+                m.bias.data.fill_(0.01)
+
+    def forward(self, audio, lengths=None):
+        if lengths is None:
+            # output
+            z = torch.mean(audio, dim=1)
+        else:
+            # rnn module
+            audio_packed = pack_padded_sequence(audio, lengths.cpu(), batch_first=True, enforce_sorted=False)
             output_packed, _ = self.rnn(audio_packed)
             x_output, _ = pad_packed_sequence(output_packed, True, total_length=audio.size(1))
             
