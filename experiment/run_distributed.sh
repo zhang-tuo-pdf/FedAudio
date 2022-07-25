@@ -16,7 +16,7 @@ echo $PROCESS_NUM
 
 hostname > mpi_host_file
 
-# sh run_distributed.sh gcommand raw mel_spec 100 8 10 1 16 0.1 0 8
+# sh run_distributed.sh gcommand raw mel_spec 100 8 1000 1 16 0.1 0 8
 
 mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./distributed_main.py \
   --dataset $DATA_SET \

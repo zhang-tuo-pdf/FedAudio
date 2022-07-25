@@ -37,7 +37,10 @@ def load_partition_data_audio(
     
     # train dataset
     logging.info("data split begin")
-    wav_train_data_dict, class_num = audio_partition(folder_path, test_fold=args.test_fold, split='train')
+    wav_train_data_dict, class_num = audio_partition(folder_path, 
+                                                     test_fold=args.test_fold, 
+                                                     split='train', 
+                                                     num_clients=num_clients)
     logging.info("data split finish")
     
     # fl feature: noise addition
@@ -170,11 +173,11 @@ if __name__ == "__main__":
     # step 0 train data split
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--raw_data_path', type=str, default='../../data/urbansound', help='Raw data path of UrbanSound8k data set'
+        '--raw_data_path', type=str, default='../../data/urban_sound/UrbanSound8K', help='Raw data path of UrbanSound8k data set'
     )
     
     parser.add_argument(
-        '--output_data_path', type=str, default='../../data/urbansound', help='Output path of UrbanSound8k data set'
+        '--output_data_path', type=str, default='../../data/urban_sound', help='Output path of UrbanSound8k data set'
     )
     
     parser.add_argument(
@@ -186,7 +189,7 @@ if __name__ == "__main__":
     )
     
     parser.add_argument(
-        '--num_clients', type=int, default=50, help='Number of clients to cut from whole data.'
+        '--num_clients', type=int, default=32, help='Number of clients to cut from whole data.'
     )
     
     parser.add_argument(

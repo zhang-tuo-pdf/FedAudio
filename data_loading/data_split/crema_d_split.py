@@ -21,6 +21,9 @@ def audio_partition(folder_path, test_fold=1, split='train'):
     for speaker_id in speaker_ids:
         file_list = list(Path(folder_path).joinpath('AudioWAV').glob("10"+str(speaker_id)+'_*.wav'))
         for file_name in file_list:
+            # no annotations were found
+            if str(file_name).split('/')[-1].split('.wav')[0] not in list(rating_df.index):
+                continue
             label = rating_df.loc[str(file_name).split('/')[-1].split('.wav')[0], 'MultiModalVote']
             # correputed audio file per download
             if '1076_MTI_SAD_XX.wav' in str(file_name): continue

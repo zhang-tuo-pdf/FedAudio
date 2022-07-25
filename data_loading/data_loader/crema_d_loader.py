@@ -165,7 +165,7 @@ if __name__ == "__main__":
     # step 0 train data split
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--raw_data_path', type=str, default='../../data/crema_d', help='Raw data path of Crema-D data set'
+        '--raw_data_path', type=str, default='../../data/crema_d/CREMA-D', help='Raw data path of Crema-D data set'
     )
     
     parser.add_argument(
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     )
     
     parser.add_argument(
-        '--feature_type', type=str, default='mel_spec', help='Feature type based on the process_method method'
+        '--feature_type', type=str, default='apc', help='Feature type based on the process_method method'
     )
     
     parser.add_argument(
