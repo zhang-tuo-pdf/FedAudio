@@ -5,6 +5,7 @@ import pickle
 from tqdm import tqdm
 from pathlib import Path
 import argparse
+import numpy as np
 import torch.utils.data as data
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
@@ -84,6 +85,7 @@ def load_partition_data_audio(
                 )
             elif process_method == "raw":
                 features = mel_spectrogram(audio_file_path)
+            features =  (features - np.mean(features, axis=0)) / (np.std(features, axis=0) + 1e-5)
             wav_train_data_dict[i][j].append(features)
     logging.info("data have been processed")
     train_data_local_dict = {}
@@ -125,6 +127,7 @@ def load_partition_data_audio(
                 )
             elif process_method == "raw":
                 features = mel_spectrogram(audio_file_path)
+            features =  (features - np.mean(features, axis=0)) / (np.std(features, axis=0) + 1e-5)
             wav_global_test[i][j].append(features)
     logging.info("test data have been processed")
     global_test_dataset = DatasetGenerator(wav_global_test[0])

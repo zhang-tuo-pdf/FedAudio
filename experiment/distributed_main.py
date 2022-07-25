@@ -224,11 +224,11 @@ def validate_args(args):
         )
 
     # Training settings possible or not
-    if args.dataset == "iemocap":
-        if int(args.client_num_in_total) != 8:
-            raise Exception(
-                "Total number of clients does not match with " + args.dataset
-            )
+    # if args.dataset == "iemocap":
+        # if int(args.client_num_in_total) != 8:
+        #     raise Exception(
+        #         "Total number of clients does not match with " + args.dataset
+        #     )
 
 
 def load_data(args, dataset_name):
@@ -270,9 +270,18 @@ def load_data(args, dataset_name):
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
     elif dataset_name == "iemocap":
-        load_file_path = "../data/iemocap/processed_dataset_pretrain_apc_Session1.p"
+        save_file_name = (
+            "iemocap/processed_dataset_"
+            + args.process_method
+            + "_"
+            + args.feature_type
+            + "_Session"
+            + str(args.test_fold)
+            + ".p"
+        )
+        load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))
-        logging.info(dataset_name + " dataset has been loaded from saved file")
+        logging.info("dataset has been loaded from saved file")
     return dataset
 
 
@@ -347,7 +356,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            mode="disabled",
+            # mode="disabled",
             project="fedaudio",
             entity="ultrazt",
             name=str(args.fl_algorithm)
