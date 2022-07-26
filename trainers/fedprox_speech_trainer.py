@@ -1,5 +1,6 @@
 import logging, pdb
 from math import ceil
+import copy
 import torch
 from torch import nn
 from tqdm import tqdm
@@ -26,6 +27,8 @@ class FedProxModelTrainer(ModelTrainer):
 
     def train(self, train_data, device, args, round_idx, client_idx):
         model = self.model
+        last_global_model = copy.deepcopy(model)
+        last_global_model.to(device)
         model.to(device)
         model.train()
         logging.info(" Client ID " + str(client_idx) + " round Idx " + str(round_idx))
@@ -42,14 +45,13 @@ class FedProxModelTrainer(ModelTrainer):
             #  data, labels, lens
             for batch_idx, (data, labels, lens) in enumerate(train_data):
                 # data = torch.squeeze(data, 1)
-                last_global_parameter = model.parameters()
                 data, labels, lens = data.to(device), labels.to(device), lens.to(device)
                 optimizer.zero_grad()
                 output = model(data, lens)
                 loss = criterion(output, labels)
                 # compute proximal_term
                 proximal_term = 0.0
-                for w, w_t in zip(model.parameters(), last_global_parameter):
+                for w, w_t in zip(model.parameters(), last_global_model.parameters()):
                     proximal_term += (w - w_t).norm(2)
                 loss = loss + (args.mu / 2) * proximal_term
                 loss.backward()

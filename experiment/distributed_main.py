@@ -129,7 +129,7 @@ def add_args(parser):
         "--fl_algorithm",
         type=str,
         default="FedAvgSeq",
-        help="Algorithm list: FedAvg; FedOPT; FedProx ",
+        help="Algorithm list: FedAvg; FedOPT; FedProx; FedAvgSeq ",
     )
 
     parser.add_argument(
@@ -142,7 +142,7 @@ def add_args(parser):
     parser.add_argument(
         "--mu",
         type=float,
-        default=0.1,
+        default=1,
         metavar="mu",
         help="variable for FedProx",
     )
@@ -320,7 +320,7 @@ def create_model(args):
 
 
 def custom_model_trainer(args, model):
-    if args.alg_name == "FedProx":
+    if args.fl_algorithm == "FedProx":
         return FedProxModelTrainer(model)
     else:
         return MyModelTrainer(model)
