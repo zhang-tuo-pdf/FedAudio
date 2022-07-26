@@ -29,3 +29,14 @@ sh run_distributed.sh gcommand 2118 10 8 30 1 16 0.1 0 8
 Google speech command: 2118 clients
 https://arxiv.org/abs/1804.03209
 
+IEMOCAP: 10 clients
+https://sail.usc.edu/iemocap/
+
+CREMA-D: 91 clients
+https://github.com/CheyneyComputerScience/CREMA-D
+
+MELD: 260 clients
+https://affective-meld.github.io/
+
+Urban-Sound
+https://urbansounddataset.weebly.com/urbansound8k.html
