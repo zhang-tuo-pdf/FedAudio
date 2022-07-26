@@ -32,6 +32,7 @@ from model.bc_resnet import BCResNet
 from model.conv_model import audio_conv_rnn
 from model.conv_model import audio_rnn
 from trainers.speech_trainer import MyModelTrainer
+from trainers.fedprox_speech_trainer import FedProxModelTrainer
 from FedML.fedml_api.distributed.fedavg.FedAvgAPI import (
     FedML_init,
     FedML_FedAvg_distributed,
@@ -136,6 +137,14 @@ def add_args(parser):
         type=int,
         default=30,
         help="how many round of communications we shoud use",
+    )
+
+    parser.add_argument(
+        "--mu",
+        type=float,
+        default=0.1,
+        metavar="mu",
+        help="variable for FedProx",
     )
 
     parser.add_argument(
@@ -311,7 +320,10 @@ def create_model(args):
 
 
 def custom_model_trainer(args, model):
-    return MyModelTrainer(model)
+    if args.alg_name == "FedProx":
+        return FedProxModelTrainer(model)
+    else:
+        return MyModelTrainer(model)
 
 
 def set_seed(seed):
@@ -326,12 +338,12 @@ def set_seed(seed):
 def get_fl_algorithm_initializer(alg_name):
     if alg_name == "FedAvg":
         fl_algorithm = FedML_FedAvg_distributed
-    elif alg_name == "FedAvgSeq":
+    elif alg_name == "FedAvgSeq" or alg_name == "FedProx":
         fl_algorithm = FedML_FedAvgSeq_distributed
     elif alg_name == "FedOPT":
         fl_algorithm = FedML_FedOpt_distributed
-    elif alg_name == "FedProx":
-        fl_algorithm = FedML_FedProx_distributed
+    # elif alg_name == "FedProx":
+    #     fl_algorithm = FedML_FedProx_distributed
     else:
         raise Exception("please do sanity check for this algorithm.")
 
