@@ -4,7 +4,19 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def audio_partition(folder_path, split='train', task='sentiment'):
+def audio_partition(folder_path: str, split: str = 'train', task: str = 'sentiment') -> (dict, int):
+    """
+    Gets wav data dict and the number of unique classes for task.
+
+    :param folder_path: Folder path in which corresponding download script for meld dataset download_audio.sh was executed
+    :param split: split to load. Either 'train','test' or 'dev'
+    :param task: task to load. Either 'sentiment' or 'emotion'
+    :return: data_dict with structure {speaker_index:[[speaker_name, file_path, category] ... ] and number of classes
+    """
+    if split not in ['train', 'test', 'dev']:
+        raise ValueError("split must be either 'train','test' or 'dev' for MELD dataset")
+    if task not in ['emotion', 'sentiment']:
+        raise ValueError("task must be either 'sentiment' or 'emotion' for MELD dataset")
     if split == 'train':
         label_path = f'{folder_path}/train_sent_emo.csv'
         data_path = f'{folder_path}/train_splits'
@@ -36,12 +48,12 @@ def audio_partition(folder_path, split='train', task='sentiment'):
 
     df_label_reduced = df_label_cleaned[['Speaker', 'Path', 'Category']]
     groups = df_label_reduced.groupby('Speaker')
-    wav_data_dict = {i: group[['Speaker', 'Path', 'Category']].values.tolist()
-                     for i, (speaker, group) in enumerate(groups)}
-    return wav_data_dict, num_classes
+    data_dict = {i: group[['Speaker', 'Path', 'Category']].values.tolist()
+                 for i, (speaker, group) in enumerate(groups)}
+    return data_dict, num_classes
 
 
 if __name__ == '__main__':
-    folder_path = "../../data/meld/"
-    wav_data_dict, class_num = audio_partition(folder_path, 'dev', 'emotion')
+    meld_folder_path = "../../data/meld/"
+    wav_data_dict, class_num = audio_partition(meld_folder_path, 'dev', 'emotion')
     print(wav_data_dict[1][0][0])
