@@ -11,7 +11,7 @@ def audio_partition(folder_path: str, split: str = 'train', task: str = 'sentime
     :param folder_path: Folder path in which corresponding download script for meld dataset download_audio.sh was executed
     :param split: split to load. Either 'train','test' or 'dev'
     :param task: task to load. Either 'sentiment' or 'emotion'
-    :return: data_dict with structure {speaker_index:[[speaker_name, file_path, category] ... ] and number of classes
+    :return: data_dict with structure {speaker_index:[[key, file_path, category] ... ] and number of classes
     """
     if split not in ['train', 'test', 'dev']:
         raise ValueError("split must be either 'train','test' or 'dev' for MELD dataset")
@@ -45,6 +45,8 @@ def audio_partition(folder_path: str, split: str = 'train', task: str = 'sentime
 
     df_label_cleaned['Path'] = df_label_cleaned.apply(
         lambda row: f"{data_path}/waves/dia{df_row.Dialogue_ID}_utt{df_row.Utterance_ID}.wav", axis=1)
+    df_label_cleaned['Filename'] = df_label_cleaned.apply(
+        lambda row: f"dia{df_row.Dialogue_ID}_utt{df_row.Utterance_ID}", axis=1)
 
     df_label_reduced = df_label_cleaned[['Speaker', 'Path', 'Category']]
     groups = df_label_reduced.groupby('Speaker')
@@ -54,6 +56,6 @@ def audio_partition(folder_path: str, split: str = 'train', task: str = 'sentime
 
 
 if __name__ == '__main__':
-    meld_folder_path = "../../data/meld/"
+    meld_folder_path = "../../data/meld"
     wav_data_dict, class_num = audio_partition(meld_folder_path, 'dev', 'emotion')
     print(wav_data_dict[1][0][0])
