@@ -136,7 +136,7 @@ def add_args(parser):
         "--comm_round",
         type=int,
         default=30,
-        help="how many round of communications we shoud use",
+        help="how many round of communications we should use",
     )
 
     parser.add_argument(
@@ -287,6 +287,17 @@ def load_data(args, dataset_name):
             + "_Session"
             + str(args.test_fold)
             + ".p"
+        )
+        load_file_path = args.data_dir + save_file_name
+        dataset = pickle.load(open(load_file_path, "rb"))
+        logging.info("dataset has been loaded from saved file")
+    elif dataset_name == "meld":
+        save_file_name = (
+                "meld/processed_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + ".p"
         )
         load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))

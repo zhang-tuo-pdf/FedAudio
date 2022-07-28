@@ -1,12 +1,12 @@
-import os.path
-import sys
-import logging
-import pickle
-from tqdm import tqdm
-from pathlib import Path
 import argparse
-import numpy as np
+import logging
+import os.path
+import pickle
+import sys
+from pathlib import Path
+
 import torch.utils.data as data
+from tqdm import tqdm
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
@@ -16,8 +16,9 @@ from data_split.meld_split import audio_partition
 from fl_feature.add_nosiy import add_noise_snr
 from data_preprocess.opensmile_extractor import opensmile_feature
 from data_preprocess.pretrain_model_extractor import pretrained_feature, load_model
-from data_preprocess.raw_audio_process import mfcc, mel_spectrogram
+from data_preprocess.raw_audio_process import mel_spectrogram
 from data_preprocess.speaker_normalization import speaker_normalization
+
 
 def load_partition_data_audio(
         raw_data_path,
@@ -184,15 +185,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not Path(args.raw_data_path).exists():
-        raise Exception("Crema-D data not found, please check arg raw_data_path!")
-    if args.test_fold not in [1, 2, 3, 4, 5]:
-        raise Exception("Invailid test fold, available options: 1; 2; 3; 4; 5.")
+        raise Exception("MELD data not found, please check arg raw_data_path!")
     Path(args.output_data_path).mkdir(parents=True, exist_ok=True)
 
     batch_size = 16
     fl_feature = False
     snr_level = [20, 30, 40]
-    device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
+    device_ratio = [round(0.4 * 260), round(0.3 * 260), round(0.3 * 260)]
     (
         train_data_num,
         test_data_num,
@@ -222,8 +221,7 @@ if __name__ == "__main__":
         test_data_local_dict,
         class_num,
     ]
-    save_file_name = 'processed_dataset_' + args.process_method + '_' + args.feature_type + '_fold_' + str(
-        args.test_fold) + '.p'
+    save_file_name = 'processed_dataset_' + args.process_method + '_' + args.feature_type + '.p'
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')
