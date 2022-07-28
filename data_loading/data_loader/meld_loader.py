@@ -17,7 +17,7 @@ from fl_feature.add_nosiy import add_noise_snr
 from data_preprocess.opensmile_extractor import opensmile_feature
 from data_preprocess.pretrain_model_extractor import pretrained_feature, load_model
 from data_preprocess.raw_audio_process import mfcc, mel_spectrogram
-
+from data_preprocess.speaker_normalization import speaker_normalization
 
 def load_partition_data_audio(
         raw_data_path,
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        '--output_data_path', type=str, default='../../meld', help='Output path of MELD data set'
+        '--output_data_path', type=str, default='../../data/meld', help='Output path of MELD data set'
     )
 
     parser.add_argument(

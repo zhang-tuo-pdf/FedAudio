@@ -48,9 +48,9 @@ def audio_partition(folder_path: str, split: str = 'train', task: str = 'sentime
     df_label_cleaned['Filename'] = df_label_cleaned.apply(
         lambda row: f"dia{df_row.Dialogue_ID}_utt{df_row.Utterance_ID}", axis=1)
 
-    df_label_reduced = df_label_cleaned[['Speaker', 'Path', 'Category']]
+    df_label_reduced = df_label_cleaned[['Speaker', 'Filename', 'Path', 'Category']]
     groups = df_label_reduced.groupby('Speaker')
-    data_dict = {i: group[['Speaker', 'Path', 'Category']].values.tolist()
+    data_dict = {i: group[['Filename', 'Path', 'Category']].values.tolist()
                  for i, (speaker, group) in enumerate(groups)}
     return data_dict, num_classes
 
