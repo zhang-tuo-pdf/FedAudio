@@ -263,6 +263,7 @@ class FedAVGAggregator(object):
             # test on test dataset
             test_acc = sum(test_tot_corrects) / sum(test_num_samples)
             test_loss = sum(test_losses) / sum(test_num_samples)
+            wandb.log({"Test/Sample Number": sum(test_num_samples), "round": round_idx})
             wandb.log({"Test/Acc": test_acc, "round": round_idx})
             wandb.log({"Test/Loss": test_loss, "round": round_idx})
             stats = {"test_acc": test_acc, "test_loss": test_loss}

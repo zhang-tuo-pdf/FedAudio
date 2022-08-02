@@ -16,7 +16,6 @@ echo $PROCESS_NUM
 
 hostname > mpi_host_file
 
-# sh run_distributed.sh gcommand raw mel_spec 100 8 1000 1 16 0.1 0 8
 
 mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./distributed_main.py \
   --dataset $DATA_SET \
@@ -30,3 +29,10 @@ mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./distributed_main.py 
   --lr $LR \
   --starting_gpu $STARTING_GPU_INDEX \
   --gpu_num_per_server $GPU_NUM_PER_SERVER
+
+  # gcommand
+  # sh run_distributed.sh gcommand raw mel_spec 100 8 1000 1 16 0.1 0 8
+  # iemocap
+  # sh run_distributed.sh iemocap pretrain apc 10 8 5000 1 16 0.0025 0 8
+  # crema-d
+  # sh run_distributed.sh crema_d pretrain apc 9 8 5000 1 16 0.1 0 8
