@@ -41,6 +41,7 @@ from FedML.fedml_api.distributed.fedavg_seq.FedAvgSeqAPI import (
     FedML_init,
     FedML_FedAvgSeq_distributed,
 )
+from FedML.fedml_api.distributed.fedopt_seq.FedOptSeqAPI import FedML_FedOptSeq_distributed
 from FedML.fedml_api.distributed.fedopt.FedOptAPI import FedML_FedOpt_distributed
 from FedML.fedml_api.distributed.fedprox.FedProxAPI import FedML_FedProx_distributed
 
@@ -128,7 +129,7 @@ def add_args(parser):
     parser.add_argument(
         "--fl_algorithm",
         type=str,
-        default="FedAvgSeq",
+        default="FedOPT",
         help="Algorithm list: FedAvg; FedOPT; FedProx; FedAvgSeq ",
     )
 
@@ -206,7 +207,7 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=3, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
     parser.add_argument("--ci", type=int, default=0, help="CI")
@@ -352,7 +353,7 @@ def get_fl_algorithm_initializer(alg_name):
     elif alg_name == "FedAvgSeq" or alg_name == "FedProx":
         fl_algorithm = FedML_FedAvgSeq_distributed
     elif alg_name == "FedOPT":
-        fl_algorithm = FedML_FedOpt_distributed
+        fl_algorithm = FedML_FedOptSeq_distributed
     # elif alg_name == "FedProx":
     #     fl_algorithm = FedML_FedProx_distributed
     else:
@@ -379,7 +380,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            # mode="disabled",
+            mode="disabled",
             project="fedaudio",
             entity="ultrazt",
             name=str(args.fl_algorithm)
