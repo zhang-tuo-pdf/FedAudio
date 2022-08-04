@@ -156,6 +156,7 @@ def init_client(
         client_index,
         train_data_local_dict,
         train_data_local_num_dict,
+        test_data_local_dict,
         train_data_num,
         device,
         args,

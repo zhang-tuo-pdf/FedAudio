@@ -211,6 +211,13 @@ def add_args(parser):
     )
 
     parser.add_argument("--ci", type=int, default=0, help="CI")
+
+    parser.add_argument('--server_optimizer', type=str, default='adam',
+                        help='server_optimizer')
+
+    parser.add_argument('--server_lr', type=float, default=0.001,
+                        help='server_lr')
+
     args = parser.parse_args()
     return args
 
