@@ -44,14 +44,17 @@ def audio_partition(folder_path: str, split: str = 'train', task: str = 'sentime
         num_classes = len(emotions.keys())
 
     df_label_cleaned['Path'] = df_label_cleaned.apply(
-        lambda row: f"{data_path}/waves/dia{df_row.Dialogue_ID}_utt{df_row.Utterance_ID}.wav", axis=1)
+        lambda row: f"{data_path}/waves/dia{row.Dialogue_ID}_utt{row.Utterance_ID}.wav", axis=1)
     df_label_cleaned['Filename'] = df_label_cleaned.apply(
-        lambda row: f"dia{df_row.Dialogue_ID}_utt{df_row.Utterance_ID}", axis=1)
+        lambda row: f"dia{row.Dialogue_ID}_utt{row.Utterance_ID}", axis=1)
 
     df_label_reduced = df_label_cleaned[['Speaker', 'Filename', 'Path', 'Category']]
     groups = df_label_reduced.groupby('Speaker')
-    data_dict = {i: group[['Filename', 'Path', 'Category']].values.tolist()
-                 for i, (speaker, group) in enumerate(groups)}
+    data_dict = {speaker: group[['Filename', 'Path', 'Category']].values.tolist()
+                 for _, (speaker, group) in enumerate(groups) if len(group[['Filename', 'Path', 'Category']]) > 10}
+    for filter_speaker in ["All", "Man", "Policeman", "Tag", "Woman"]:
+        if filter_speaker in data_dict:
+            data_dict.pop(filter_speaker)
     return data_dict, num_classes
 
 
