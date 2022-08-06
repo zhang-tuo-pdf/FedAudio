@@ -129,7 +129,7 @@ def add_args(parser):
     parser.add_argument(
         "--fl_algorithm",
         type=str,
-        default="FedOPT",
+        default="FedAvg",
         help="Algorithm list: FedAvg; FedOPT; FedProx; FedAvgSeq ",
     )
 
@@ -207,8 +207,14 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=3, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=10, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
+
+    parser.add_argument('--fl_feature', type=bool, default=True,
+                        help='raw data or nosiy data')
+
+    parser.add_argument('--db_level', type=float, default=20,
+                        help='snr level for the audio (20,30,40)')
 
     parser.add_argument("--ci", type=int, default=0, help="CI")
 
@@ -250,13 +256,26 @@ def validate_args(args):
 
 def load_data(args, dataset_name):
     if dataset_name == "gcommand":
-        save_file_name = (
-            "speech_commands/processed_dataset_"
-            + args.process_method
-            + "_"
-            + args.feature_type
-            + ".p"
-        )
+        if args.fl_feature:
+            save_file_name = (
+                "speech_commands/processed_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + "_db" 
+                + str(args.db_level)
+                + ".p"
+            )
+            logging.info("Processing the nosiy data with snr level %s" % str(args.db_level))
+        else:
+            save_file_name = (
+                "speech_commands/processed_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + ".p"
+            )
+            logging.info('Processing the raw data')
         load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")

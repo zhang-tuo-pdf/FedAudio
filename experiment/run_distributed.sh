@@ -36,3 +36,5 @@ mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./distributed_main.py 
   # sh run_distributed.sh iemocap pretrain apc 10 8 5000 1 16 0.0025 0 8
   # crema-d
   # sh run_distributed.sh crema_d pretrain apc 9 8 5000 1 16 0.1 0 8
+  # urban_sound
+  # sh run_distributed.sh urban_sound raw mel_spec 10 8 5000 1 16 0.1 0 8

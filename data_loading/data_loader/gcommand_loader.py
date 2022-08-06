@@ -182,12 +182,21 @@ if __name__ == "__main__":
         default="mel_spec",
         help="Feature type based on the process_method method",
     )
+
+    parser.add_argument(
+        "--db_level",
+        type=float,
+        default=20,
+        help="db level for the adding nosiy",
+    )
     args = parser.parse_args()
 
     batch_size = 16
-    fl_feature = False
-    snr_level = [20, 30, 40]
-    device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
+    fl_feature = True
+    # snr_level = [20, 20, 20]
+    # device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
+    snr_level = [args.db_level]
+    device_ratio = [2118]
     (
         train_data_num,
         test_data_num,
@@ -215,10 +224,16 @@ if __name__ == "__main__":
         test_data_local_dict,
         class_num,
     ]
-
-    save_file_name = (
-        "processed_dataset_" + args.process_method + "_" + args.feature_type + ".p"
-    )
+    if fl_feature == True:
+        save_file_name = (
+            "processed_dataset_" + args.process_method + "_" + args.feature_type + "_db" + str(args.db_level) + ".p"
+        )
+    else:
+        save_file_name = (
+            "processed_dataset_" + args.process_method + "_" + args.feature_type + ".p"
+        )
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print("data finished")
+
+#taskset 100 python
