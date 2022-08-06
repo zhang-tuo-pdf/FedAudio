@@ -21,10 +21,10 @@ def audio_partition(folder_path: str, split: str = 'train', task: str = 'sentime
         label_path = f'{folder_path}/train_sent_emo.csv'
         data_path = f'{folder_path}/train_splits'
     elif split == 'test':
-        label_path = f'{folder_path}/MELD.Raw/test_sent_emo.csv'
+        label_path = f'{folder_path}/test_sent_emo.csv'
         data_path = f'{folder_path}/output_repeated_splits_test'
     elif split == 'dev':
-        label_path = f'{folder_path}/MELD.Raw/dev_sent_emo.csv'
+        label_path = f'{folder_path}/dev_sent_emo.csv'
         data_path = f'{folder_path}/dev_splits_complete'
 
     df_label = pd.read_csv(label_path)
