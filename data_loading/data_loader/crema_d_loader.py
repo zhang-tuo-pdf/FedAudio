@@ -8,6 +8,7 @@ from tqdm import tqdm
 from pathlib import Path
 import torch.utils.data as data
 from wandb import set_trace
+import shutil
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
@@ -45,7 +46,9 @@ def load_partition_data_audio(
         logging.info("add federated learning related features")
         output_folder = (
             os.path.join(output_path, "fl_dataset/")
-        )        
+        )
+        if os.path.isdir(output_folder):
+            shutil.rmtree(output_folder)        
         if not os.path.isdir(output_folder):
             # step 1 create fl dataset
             logging.info("create federated learning dataset")
