@@ -375,7 +375,7 @@ def set_seed(seed):
 
 def get_fl_algorithm_initializer(alg_name):
     if alg_name == "FedAvg":
-        fl_algorithm = FedML_FedAvg_distributed
+        fl_algorithm = FedML_FedAvgSeq_distributed
     elif alg_name == "FedAvgSeq" or alg_name == "FedProx":
         fl_algorithm = FedML_FedAvgSeq_distributed
     elif alg_name == "FedOPT":
@@ -406,7 +406,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            mode="disabled",
+            # mode="disabled",
             project="fedaudio",
             entity="ultrazt",
             name=str(args.fl_algorithm)

@@ -38,40 +38,43 @@ def load_partition_data_audio(
     logging.info("data split begin")
     wav_train_data_dict, class_num = audio_partition(folder_path, test_fold=args.test_fold, split='train')
     logging.info("data split finish")
-    
+    client_idx = list(wav_train_data_dict.keys())
+
     # fl feature: noise addition
     if fl_feature:
         logging.info("add federated learning related features")
         output_folder = (
             os.path.join(output_path, "fl_dataset/")
-        )
-        Path.mkdir()
-        
+        )        
         if not os.path.isdir(output_folder):
             # step 1 create fl dataset
             logging.info("create federated learning dataset")
             target_snr_db = [0] * len(wav_train_data_dict)
             start = 0
             for i in range(len(device_ratio)):
-                end = start + device_ratio[i]
-                target_snr_db[start:end] = [snr_level[i]] * device_ratio[i]
+                end = start + round(device_ratio[i] * len(wav_train_data_dict))
+                #print("this is ", round(device_ratio[i] * len(wav_train_data_dict)))
+                target_snr_db[start:end] = [snr_level[0]] * round(device_ratio[i] * len(wav_train_data_dict))
                 start = end
             Path.mkdir(Path(output_folder), parents=True, exist_ok=True)
             for i in tqdm(range(len(wav_train_data_dict))):
-                for j in range(len(wav_train_data_dict[i])):
-                    audio_file_path = "../" + wav_train_data_dict[i][j][1]
+                for j in range(len(wav_train_data_dict[client_idx[i]])):
+                    audio_file_path = wav_train_data_dict[client_idx[i]][j][1]
+                    a = audio_file_path.split('/', 9 )
                     output_file_path = (
-                        output_folder + wav_train_data_dict[i][j][0] + ".wav"
+                        output_folder + a[6]
                     )
                     add_noise_snr(audio_file_path, output_file_path, target_snr_db[i])
-                    wav_train_data_dict[i][j][1] = output_file_path
+                    wav_train_data_dict[client_idx[i]][j][1] = output_file_path
         else:
             for i in tqdm(range(len(wav_train_data_dict))):
-                for j in range(len(wav_train_data_dict[i])):
+                for j in range(len(wav_train_data_dict[client_idx[i]])):
+                    audio_file_path = wav_train_data_dict[client_idx[i]][j][1]
+                    a = audio_file_path.split('/', 9 )
                     output_file_path = (
-                        output_folder + wav_train_data_dict[i][j][0] + ".wav"
+                        output_folder + a[6]
                     )
-                    wav_train_data_dict[i][j][1] = output_file_path
+                    wav_train_data_dict[client_idx[i]][j][1] = output_file_path
     logging.info("federated learning feature loaded")
     
     # step 2 preprocess data
@@ -183,6 +186,14 @@ if __name__ == "__main__":
     parser.add_argument(
         '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
+
+    parser.add_argument(
+        "--db_level",
+        type=float,
+        default=20,
+        help="db level for the adding nosiy",
+    )
+
     args = parser.parse_args()
     
     if not Path(args.raw_data_path).exists(): 
@@ -192,9 +203,11 @@ if __name__ == "__main__":
     Path(args.output_data_path).mkdir(parents=True, exist_ok=True)
     
     batch_size = 16
-    fl_feature = False
-    snr_level = [20, 30, 40]
-    device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
+    fl_feature = True
+    # snr_level = [20, 30, 40]
+    snr_level = [args.db_level]
+    #device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
+    device_ratio = [0.4, 0.3, 0.3]
     (
         train_data_num,
         test_data_num,
@@ -224,7 +237,12 @@ if __name__ == "__main__":
         test_data_local_dict,
         class_num,
     ]
-    save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+'.p'
+    if fl_feature == True:
+        save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_db"+str(args.db_level)+'.p'
+    else:
+        save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+'.p'
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')
+
+#taskset 100 python
