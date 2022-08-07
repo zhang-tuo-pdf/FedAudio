@@ -3,6 +3,7 @@ from math import ceil
 import torch
 from torch import nn
 from tqdm import tqdm
+from sklearn.metrics import f1_score
 
 try:
     from fedml_core.trainer.model_trainer import ModelTrainer
@@ -71,11 +72,11 @@ class MyModelTrainer(ModelTrainer):
         model.to(device)
         model.eval()
 
-        metrics = {"test_correct": 0, "test_loss": 0, "test_total": 0}
-
+        metrics = {"test_correct": 0, "test_loss": 0, "test_total": 0, "test_f1": 0}
         criterion = nn.CrossEntropyLoss(reduction="sum").to(device)
 
         with torch.no_grad():
+            label_list, pred_list = list(), list()
             for batch_idx, (data, labels, lens) in enumerate(tqdm(test_data)):
                 # for data, labels, lens in test_data:
                 data, labels, lens = data.to(device), labels.to(device), lens.to(device)
@@ -85,10 +86,14 @@ class MyModelTrainer(ModelTrainer):
                     1
                 ]  # get the index of the max log-probability
                 correct = pred.eq(labels.data.view_as(pred)).sum()
-
+                for idx in range(len(labels)):
+                    label_list.append(labels.detach().cpu().numpy()[idx])
+                    pred_list.append(pred.detach().cpu().numpy()[idx][0])
+                    
                 metrics["test_correct"] += correct.item()
                 metrics["test_loss"] += loss * labels.size(0)
                 metrics["test_total"] += labels.size(0)
+        metrics["test_f1"] = f1_score(label_list, pred_list, average='macro')
         return metrics
 
     def test_on_the_server(
