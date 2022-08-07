@@ -129,7 +129,7 @@ def add_args(parser):
     parser.add_argument(
         "--fl_algorithm",
         type=str,
-        default="FedAvg",
+        default="FedAvgSeq",
         help="Algorithm list: FedAvg; FedOPT; FedProx; FedAvgSeq ",
     )
 
