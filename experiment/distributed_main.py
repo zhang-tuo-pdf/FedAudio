@@ -207,7 +207,7 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=5, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
     parser.add_argument('--fl_feature', type=bool, default=True,
@@ -442,6 +442,8 @@ if __name__ == "__main__":
             name=str(args.fl_algorithm)
             + "-r"
             + str(args.comm_round)
+            + "-c"
+            + str(args.client_num_per_round)
             + "-e"
             + str(args.epochs)
             + "-lr"
