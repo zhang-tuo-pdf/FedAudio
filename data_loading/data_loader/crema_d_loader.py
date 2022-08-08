@@ -187,7 +187,7 @@ if __name__ == "__main__":
     )
     
     parser.add_argument(
-        '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=2, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
     parser.add_argument(

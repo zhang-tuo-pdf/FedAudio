@@ -52,7 +52,7 @@ def load_partition_data_audio(
             os.path.join(output_path, "fl_dataset/")
         )
         if os.path.isdir(output_folder):
-            shutil.rmtree(output_folder)
+            shutil.rmtree(output_folder)        
         if not os.path.isdir(output_folder):
             # step 1 create fl dataset
             logging.info("create federated learning dataset")
@@ -64,21 +64,21 @@ def load_partition_data_audio(
                 start = end
             Path.mkdir(Path(output_folder), parents=True, exist_ok=True)
             for i in tqdm(range(len(wav_train_data_dict))):
-                for j in range(len(wav_train_data_dict[i])):
+                for j in range(len(wav_train_data_dict[client_idx[i]])):
                     audio_file_path = wav_train_data_dict[client_idx[i]][j][1]
                     a = audio_file_path.split('/', 9 )
                     output_file_path = (
-                        output_folder + a[7]
+                        output_folder + a[-1]
                     )
                     add_noise_snr(audio_file_path, output_file_path, target_snr_db[i])
                     wav_train_data_dict[client_idx[i]][j][1] = output_file_path
         else:
             for i in tqdm(range(len(wav_train_data_dict))):
-                for j in range(len(wav_train_data_dict[i])):
+                for j in range(len(wav_train_data_dict[client_idx[i]])):
                     audio_file_path = wav_train_data_dict[client_idx[i]][j][1]
                     a = audio_file_path.split('/', 9 )
                     output_file_path = (
-                        output_folder + a[7]
+                        output_folder + a[-1]
                     )
                     wav_train_data_dict[client_idx[i]][j][1] = output_file_path
     logging.info("federated learning feature loaded")

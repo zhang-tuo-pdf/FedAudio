@@ -36,6 +36,6 @@ def audio_partition(folder_path, test_fold=1, split='train'):
     return wav_data_dict, len(class_to_id)
 
 if __name__ == '__main__':
-    folder_path = "/media/data/public-data/crema-d"
+    folder_path = "/home/ultraz/Project/FedSpeech22/data/crema_d/CREMA-D"
     wav_data_dict, class_num = audio_partition(folder_path)
-    print(wav_data_dict[1][0][0])
+    print(wav_data_dict[19][0][1])
