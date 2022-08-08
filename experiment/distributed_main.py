@@ -207,7 +207,7 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=10, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
     parser.add_argument('--fl_feature', type=bool, default=True,
@@ -280,15 +280,30 @@ def load_data(args, dataset_name):
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
     if dataset_name == 'crema_d':
-        save_file_name = (
-            "crema_d/processed_dataset_"
-            + args.process_method
-            + "_"
-            + args.feature_type
-            + "_fold_"
-            + str(args.test_fold)
-            + ".p"
-        )
+        if args.fl_feature:
+            save_file_name = (
+                "crema_d/processed_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + "_fold_"
+                + str(args.test_fold)
+                +"_db"
+                + str(args.db_level)
+                + ".p"
+            )
+            logging.info("Processing the nosiy data with snr level %s" % str(args.db_level))
+        else:
+            save_file_name = (
+                "crema_d/processed_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + "_fold_"
+                + str(args.test_fold)
+                + ".p"
+            )
+            logging.info('Processing the raw data')
         load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
@@ -306,15 +321,30 @@ def load_data(args, dataset_name):
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
     elif dataset_name == "iemocap":
-        save_file_name = (
-            "iemocap/processed_dataset_"
-            + args.process_method
-            + "_"
-            + args.feature_type
-            + "_Session"
-            + str(args.test_fold)
-            + ".p"
-        )
+        if args.fl_feature:
+            save_file_name = (
+                "iemocap/processed_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + "_Session"
+                + str(args.test_fold)
+                +"_db"
+                + str(args.db_level)
+                + ".p"
+            )
+            logging.info("Processing the nosiy data with snr level %s" % str(args.db_level))
+        else:
+            save_file_name = (
+                "iemocap/processed_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + "_Session"
+                + str(args.test_fold)
+                + ".p"
+            )
+            logging.info('Processing the raw data')
         load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
@@ -406,7 +436,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            # mode="disabled",
+            mode="disabled",
             project="fedaudio",
             entity="ultrazt",
             name=str(args.fl_algorithm)
