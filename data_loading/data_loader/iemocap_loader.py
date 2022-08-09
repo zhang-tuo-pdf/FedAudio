@@ -8,6 +8,7 @@ from tqdm import tqdm
 from pathlib import Path
 import torch.utils.data as data
 from wandb import set_trace
+import shutil
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
@@ -204,9 +205,9 @@ if __name__ == "__main__":
     Path(args.output_data_path).mkdir(parents=True, exist_ok=True)
     
     batch_size = 16
-    fl_feature = False
-    snr_level = [20, 30, 40]
-    device_ratio = [round(0.4 * 2118), round(0.3 * 2118), round(0.3 * 2118)]
+    fl_feature = True
+    snr_level = [args.db_level]
+    device_ratio = [0.4, 0.3, 0.3]
     (
         train_data_num,
         test_data_num,
@@ -237,7 +238,7 @@ if __name__ == "__main__":
         class_num,
     ]
     if fl_feature == True:
-        save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_db"+str(args.db_level)+'.p'
+        save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_'+str(args.test_session)+"_db"+str(args.db_level)+'.p'
     else:
         save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_'+str(args.test_session)+'.p'
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
