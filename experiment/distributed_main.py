@@ -348,6 +348,7 @@ def load_data(args, dataset_name):
         load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
+        args.client_num_per_round = len(dataset[4])
     elif dataset_name == "meld":
         save_file_name = (
                 "meld/processed_dataset_"
