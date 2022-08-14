@@ -8,6 +8,8 @@ import pickle
 
 import numpy as np
 import torch
+from torch.utils.data import DataLoader
+from torch.utils.data import TensorDataset
 import wandb
 from tqdm import tqdm
 
@@ -210,8 +212,14 @@ def add_args(parser):
         '--test_fold', type=int, default=5, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
-    parser.add_argument('--fl_feature', type=bool, default=True,
+    parser.add_argument('--fl_feature', type=bool, default=False,
                         help='raw data or nosiy data')
+
+    parser.add_argument('--label_nosiy', type=bool, default=False,
+                        help='clean label or nosiy label')
+
+    parser.add_argument('--label_nosiy_level', type=float, default=0.1,
+                        help='nosiy level for labels')
 
     parser.add_argument('--db_level', type=float, default=20,
                         help='snr level for the audio (20,30,40)')
@@ -362,6 +370,23 @@ def load_data(args, dataset_name):
         logging.info("dataset has been loaded from saved file")
     return dataset
 
+def label_nosiy(args, train_data_local_dict, class_num):
+    for key, data in enumerate(tqdm(train_data_local_dict)):
+        tmp_local_dataset_X = torch.Tensor([])
+        tmp_local_dataset_Y = torch.Tensor([])
+        tmp_local_dataset_Z = torch.Tensor([])
+        for batch_idx, (data, labels, lens) in enumerate(data):
+            tmp_local_dataset_X = torch.cat((tmp_local_dataset_X, data))
+            tmp_local_dataset_Y = torch.cat((tmp_local_dataset_Y, target))
+            tmp_local_dataset_Z = torch.cat((tmp_local_dataset_Z, lens))
+        for i in range(len(tmp_local_dataset_Y)):
+            p1 = args.label_nosiy_level/(class_num-1)*np.ones(class_num)
+            p1[tmp_local_dataset_Y[i]] = 1-args.label_nosiy_level
+            tmp_local_dataset_Y[i] = np.random.choice(class_num,p=p1)
+        dataset = TensorDataset(tmp_local_dataset_X, tmp_local_dataset_Y, tmp_local_dataset_Z)
+        dataloader = DataLoader(dataset, batch_size = len(labels))
+        train_data_local_dict[key] = dataloader
+    return train_data_local_dict
 
 def create_model(args):
     model = None
@@ -437,7 +462,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            # mode="disabled",
+            mode="disabled",
             project="fedaudio",
             entity="ultrazt",
             name=str(args.fl_algorithm)
@@ -505,6 +530,10 @@ if __name__ == "__main__":
 
     # fix client number by naturally niid
     args.client_num_in_total = len(train_data_local_num_dict)
+
+    # label nosiy or not
+    if args.label_nosiy:
+        train_data_local_dict = label_nosiy(args, train_data_local_dict, class_num)
 
     # load model and trainer
     model = create_model(args)
