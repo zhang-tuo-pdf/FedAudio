@@ -28,6 +28,7 @@ sys.path.insert(
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
 
 from data_loading.data_loader import global_constant
+from data_loading.data_loader.speech_data import DatasetGenerator, collate_fn_padd
 from model.vgg_speech import VGG
 from model.LeNet import LeNet
 from model.bc_resnet import BCResNet
@@ -97,7 +98,7 @@ def add_args(parser):
         type=int,
         default=16,
         metavar="N",
-        help="input batch size for training (default: 64)",
+        help="input batch size for training (default: 16)",
     )
 
     parser.add_argument(
@@ -212,13 +213,13 @@ def add_args(parser):
         '--test_fold', type=int, default=5, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
-    parser.add_argument('--fl_feature', type=bool, default=False,
+    parser.add_argument('--fl_feature', type=bool, default=True,
                         help='raw data or nosiy data')
 
-    parser.add_argument('--label_nosiy', type=bool, default=False,
+    parser.add_argument('--label_nosiy', type=bool, default=True,
                         help='clean label or nosiy label')
 
-    parser.add_argument('--label_nosiy_level', type=float, default=0.1,
+    parser.add_argument('--label_nosiy_level', type=float, default=0.5,
                         help='nosiy level for labels')
 
     parser.add_argument('--db_level', type=float, default=20,
@@ -372,20 +373,27 @@ def load_data(args, dataset_name):
 
 def label_nosiy(args, train_data_local_dict, class_num):
     for key, data in enumerate(tqdm(train_data_local_dict)):
-        tmp_local_dataset_X = torch.Tensor([])
-        tmp_local_dataset_Y = torch.Tensor([])
-        tmp_local_dataset_Z = torch.Tensor([])
-        for batch_idx, (data, labels, lens) in enumerate(data):
-            tmp_local_dataset_X = torch.cat((tmp_local_dataset_X, data))
-            tmp_local_dataset_Y = torch.cat((tmp_local_dataset_Y, target))
-            tmp_local_dataset_Z = torch.cat((tmp_local_dataset_Z, lens))
-        for i in range(len(tmp_local_dataset_Y)):
+        tmp_dataset = []
+        original_data = train_data_local_dict[key].dataset
+        for i in range(len(original_data)):
+            tmp_dataset_cell = [0, 0]
+            # add label nosiy
+            orginal_label = original_data[i][1].numpy()
             p1 = args.label_nosiy_level/(class_num-1)*np.ones(class_num)
-            p1[tmp_local_dataset_Y[i]] = 1-args.label_nosiy_level
-            tmp_local_dataset_Y[i] = np.random.choice(class_num,p=p1)
-        dataset = TensorDataset(tmp_local_dataset_X, tmp_local_dataset_Y, tmp_local_dataset_Z)
-        dataloader = DataLoader(dataset, batch_size = len(labels))
-        train_data_local_dict[key] = dataloader
+            p1[orginal_label] = 1-args.label_nosiy_level
+            new_label = np.random.choice(class_num,p=p1)
+            # create new data cell
+            tmp_dataset_cell.append(new_label)
+            original_raw_data = original_data[i][0].numpy()
+            tmp_dataset_cell.append(original_raw_data)
+            tmp_dataset.append(tmp_dataset_cell)
+        train_dataset = DatasetGenerator(tmp_dataset)
+        train_data_local_dict[key] = DataLoader(
+            dataset=train_dataset,
+            batch_size=args.batch_size,
+            shuffle=True,
+            collate_fn=collate_fn_padd,
+        )
     return train_data_local_dict
 
 def create_model(args):
@@ -534,6 +542,7 @@ if __name__ == "__main__":
     # label nosiy or not
     if args.label_nosiy:
         train_data_local_dict = label_nosiy(args, train_data_local_dict, class_num)
+    exit()
 
     # load model and trainer
     model = create_model(args)
