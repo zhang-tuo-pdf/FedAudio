@@ -542,8 +542,7 @@ if __name__ == "__main__":
     # label nosiy or not
     if args.label_nosiy:
         train_data_local_dict = label_nosiy(args, train_data_local_dict, class_num)
-    exit()
-
+    
     # load model and trainer
     model = create_model(args)
     model_trainer = custom_model_trainer(args, model)
