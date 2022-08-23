@@ -31,7 +31,7 @@ mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./distributed_main.py 
   --gpu_num_per_server $GPU_NUM_PER_SERVER
 
   # gcommand
-  # sh run_distributed.sh gcommand raw mel_spec 100 8 1000 1 16 0.1 0 8
+  # sh run_distributed.sh gcommand raw mel_spec 106 8 5000 1 16 0.1 0 8
   # iemocap
   # sh run_distributed.sh iemocap pretrain apc 8 8 5000 1 16 0.0025 0 8
   # crema-d
