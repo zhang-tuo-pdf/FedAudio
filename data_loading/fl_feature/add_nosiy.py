@@ -17,7 +17,9 @@ def add_noise_snr(audio_file_path, output_path, target_snr_db):
     audio, sample_rate = torchaudio.load(audio_file_path)
     transform_model = torchaudio.transforms.Resample(sample_rate, 16000)
     audio = transform_model(audio)
-
+    # if the audio is not mono channel
+    if audio.shape[0] == 2:
+        audio = torch.mean(audio, dim=0).unsqueeze(dim=0)
     audio_energy_watts = np.mean(audio.detach().cpu().numpy() ** 2)
     audio_energy_db = 10 * np.log10(audio_energy_watts)
 

@@ -52,7 +52,7 @@ def load_partition_data_audio(
             os.path.join(output_path, "fl_dataset/")
         )
         if os.path.isdir(output_folder):
-            shutil.rmtree(output_folder)        
+            shutil.rmtree(output_folder)
         if not os.path.isdir(output_folder):
             # step 1 create fl dataset
             logging.info("create federated learning dataset")
@@ -62,6 +62,7 @@ def load_partition_data_audio(
                 end = start + round(device_ratio[i] * len(wav_train_data_dict))
                 target_snr_db[start:end] = [snr_level[0]] * round(device_ratio[i] * len(wav_train_data_dict))
                 start = end
+            
             Path.mkdir(Path(output_folder), parents=True, exist_ok=True)
             for i in tqdm(range(len(wav_train_data_dict))):
                 for j in range(len(wav_train_data_dict[client_idx[i]])):
@@ -157,7 +158,7 @@ def load_partition_data_audio(
     test_data_global = data.DataLoader(
         dataset=global_test_dataset,
         batch_size=batch_size,
-        shuffle=True,
+        shuffle=False,
         collate_fn=collate_fn_padd,
     )
     test_data_num = len(wav_test)

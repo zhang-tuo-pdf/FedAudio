@@ -1,4 +1,5 @@
 import re, pdb
+import torchaudio
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -20,6 +21,12 @@ def audio_partition(folder_path, test_fold=1, split='train', num_clients=50):
         audio_file_name = str(audio_file_path).split("/")[-1].split(".wav")[0]
         file_id = audio_file_name.split("-")[0]
         class_id = audio_file_name.split("-")[1]
+        # if the data is to short, we should ignore
+        audio, sr = torchaudio.load(audio_file_path)
+        audio_len = audio.shape[1] / sr
+        if audio_len < 0.1:
+            print("audio len: %.2f, skip file %s" % (audio_len, str(audio_file_path)))
+            continue
         wav_item = [file_id, str(audio_file_path), int(class_id)]
         
         if file_id not in unique_file_dict: unique_file_dict[file_id] = list()
