@@ -1,3 +1,4 @@
+from builtins import print
 import torchaudio, torch, argparse, pdb, pickle
 import numpy as np
 from tqdm import tqdm
@@ -44,7 +45,7 @@ def mel_spectrogram(audio_file_path, n_fft=1024, feature_len=128):
         hop_length=int(window_hop),
         window_fn=window_fn,
     )
-
+    # print(audio_file_path)
     audio_amp_to_db = torchaudio.transforms.AmplitudeToDB()
     return audio_amp_to_db(audio_transform(audio).detach())[0].cpu().numpy().T
 
