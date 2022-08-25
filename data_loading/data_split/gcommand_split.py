@@ -16,6 +16,8 @@ def pair_dict_gen(folder_path):
         for line in text:
             reader, others = line.strip().split("_", 1)
             key, word = line.strip().split(" ", 1)
+            if len(reader) != 8:
+                continue
             if reader not in reader_to_key:
                 reader_to_key[reader] = list()
             reader_to_key[reader].append(key)
@@ -126,7 +128,6 @@ def audio_partition(folder_path):
             word_id = class_to_id[word]
             wav_item = [key, wav_command, word_id]
             wav_data_dict[0].append(wav_item)
-
     return wav_data_dict, class_num
 
 
