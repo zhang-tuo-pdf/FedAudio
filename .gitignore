@@ -129,8 +129,8 @@ dmypy.json
 .pyre/
 
 # data folder path
-data/speech_commands/audio/*
-data/speech_commands/fl_dataset/*
+data/*
+data/*
 
 # wanbd folder
 experiment/wandb/*
