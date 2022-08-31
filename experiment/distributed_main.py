@@ -210,17 +210,17 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=5, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=10, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
-    parser.add_argument('--fl_feature', type=bool, default=True,
+    parser.add_argument('--fl_feature', type=bool, default=False,
                         help='raw data or nosiy data')
 
     parser.add_argument('--label_nosiy', type=bool, default=True,
                         help='clean label or nosiy label')
 
-    parser.add_argument('--label_nosiy_level', type=float, default=0.5,
-                        help='nosiy level for labels')
+    parser.add_argument('--label_nosiy_level', type=float, default=0.1,
+                        help='nosiy level for labels; 0.9 means 90% wrong')
 
     parser.add_argument('--db_level', type=float, default=20,
                         help='snr level for the audio (20,30,40)')
@@ -371,18 +371,70 @@ def load_data(args, dataset_name):
         logging.info("dataset has been loaded from saved file")
     return dataset
 
+# def label_nosiy(args, train_data_local_dict, class_num):
+#     mean = 0
+#     mu = args.label_nosiy_level
+#     nosiy_list = np.random.normal(mean, mu, len(train_data_local_dict))
+#     nosiy_list = np.absolute(nosiy_list)
+#     nosiy_list[nosiy_list > 1.0] = 1.0
+#     count = 0
+#     for key, data in enumerate(tqdm(train_data_local_dict)):
+#         tmp_dataset = []
+#         original_data = train_data_local_dict[key].dataset
+#         nosiy_level = nosiy_list[count]
+#         for i in range(len(original_data)):
+#             tmp_dataset_cell = [0, 0]
+#             # add label nosiy
+#             orginal_label = original_data[i][1].numpy()
+#             p1 = nosiy_level/(class_num-1)*np.ones(class_num)
+#             p1[orginal_label] = 1-nosiy_level
+#             new_label = np.random.choice(class_num,p=p1)
+#             tmp_dataset_cell.append(new_label)
+#             original_raw_data = original_data[i][0].numpy()
+#             tmp_dataset_cell.append(original_raw_data)
+#             tmp_dataset.append(tmp_dataset_cell)
+#         train_dataset = DatasetGenerator(tmp_dataset)
+#         train_data_local_dict[key] = DataLoader(
+#             dataset=train_dataset,
+#             batch_size=args.batch_size,
+#             shuffle=True,
+#             collate_fn=collate_fn_padd,
+#         )
+#         count = count + 1
+#     return train_data_local_dict
+
 def label_nosiy(args, train_data_local_dict, class_num):
     for key, data in enumerate(tqdm(train_data_local_dict)):
+        #create matrix for each user
+        noisy_level = args.label_nosiy_level
+        sparse_level = 0.4
+        prob_matrix = [1-noisy_level] * class_num * class_num
+        sparse_elements = np.random.choice(class_num*class_num, round(class_num*(class_num-1)*sparse_level))
+        for idx in range(len(sparse_elements)):
+            while sparse_elements[idx]%(class_num+1) == 0:
+                sparse_elements[idx] = np.random.choice(class_num*class_num, 1)
+                
+        for idx in range(len(sparse_elements)):
+            prob_matrix[sparse_elements[idx]] = 0
+            
+        prob_matrix = np.reshape(prob_matrix, (class_num, class_num))
+
+        for idx in range(len(prob_matrix)):
+            zeros = np.count_nonzero(prob_matrix[idx]==0)
+            if class_num-zeros-1 == 0:
+                prob_element = 0
+            else:
+                prob_element = (noisy_level) / (class_num-zeros-1)
+            prob_matrix[idx] = np.where(prob_matrix[idx] == 1-noisy_level, prob_element, prob_matrix[idx])
+            prob_matrix[idx][idx] = 1-noisy_level
+
         tmp_dataset = []
         original_data = train_data_local_dict[key].dataset
         for i in range(len(original_data)):
             tmp_dataset_cell = [0, 0]
             # add label nosiy
             orginal_label = original_data[i][1].numpy()
-            p1 = args.label_nosiy_level/(class_num-1)*np.ones(class_num)
-            p1[orginal_label] = 1-args.label_nosiy_level
-            new_label = np.random.choice(class_num,p=p1)
-            # create new data cell
+            new_label = np.random.choice(class_num,p=prob_matrix[orginal_label])
             tmp_dataset_cell.append(new_label)
             original_raw_data = original_data[i][0].numpy()
             tmp_dataset_cell.append(original_raw_data)
@@ -470,7 +522,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            mode="disabled",
+            # mode="disabled",
             project="fedaudio",
             entity="ultrazt",
             name=str(args.fl_algorithm)
