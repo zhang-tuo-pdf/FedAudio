@@ -28,7 +28,7 @@ def add_noise_snr(audio_file_path, output_path, target_snr_db):
     noise_energy_watts = 10 ** (noise_energy_db / 10)
 
     # Guassian noise addition
-    numpy.random.seed(8)
+    np.random.seed(8)
     noise = np.random.normal(0, np.sqrt(noise_energy_watts), audio.shape[1])
     noise_audio = audio + noise
     noise_audio = noise_audio.type(torch.float32)
