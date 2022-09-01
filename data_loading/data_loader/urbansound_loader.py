@@ -30,6 +30,7 @@ def load_partition_data_audio(
     num_clients,
     feature_type=None,
     fl_feature=None,
+    setup=None,
     snr_level=None,
     device_ratio=None,
 ):
@@ -42,6 +43,18 @@ def load_partition_data_audio(
                                                      test_fold=args.test_fold, 
                                                      split='train', 
                                                      num_clients=num_clients)
+    # if setup is centralized, there is no clients
+    if setup == "centralized":
+        wav_train_data_dict[0] = list()
+        for key in wav_train_data_dict:
+            if key == 0:
+                continue
+            for idx in range(len(wav_train_data_dict[key])):
+                wav_train_data_dict[0].append(wav_train_data_dict[key][idx])
+        key_list = list(wav_train_data_dict.keys())
+        for key in key_list:
+            if key != 0: 
+                wav_train_data_dict.pop(key)
     logging.info("data split finish")
     client_idx = list(wav_train_data_dict.keys())
 
@@ -157,9 +170,9 @@ def load_partition_data_audio(
     global_test_dataset = DatasetGenerator(wav_test)
     test_data_global = data.DataLoader(
         dataset=global_test_dataset,
-        batch_size=batch_size,
+        batch_size=64,
         shuffle=False,
-        collate_fn=collate_fn_padd,
+        collate_fn=collate_fn_padd
     )
     test_data_num = len(wav_test)
 
@@ -199,16 +212,30 @@ if __name__ == "__main__":
     )
     
     parser.add_argument(
+        "--fl_feature",
+        type=bool,
+        default=False,
+        help="Adding Federated features or not: True/False"
+    )
+    
+    parser.add_argument(
         '--test_fold', type=int, default=10, help='Test fold id for UrbanSound8k dataset, default test fold is 1'
     )
 
     parser.add_argument(
         "--db_level",
         type=float,
-        default=20,
+        default=10,
         help="db level for the adding nosiy",
     )
 
+    parser.add_argument(
+        "--setup",
+        type=str,
+        default="federated",
+        help="setup of the experiment: centralized/federated",
+    )
+    
     args = parser.parse_args()
     
     if not Path(args.raw_data_path).exists(): 
@@ -220,7 +247,9 @@ if __name__ == "__main__":
     Path(args.output_data_path).mkdir(parents=True, exist_ok=True)
     
     batch_size = 16
-    fl_feature = True
+    if args.setup != "federated":
+        batch_size = 64
+    fl_feature = args.fl_feature
     snr_level = [args.db_level]
     device_ratio = [0.4, 0.3, 0.3]
     (
@@ -240,6 +269,7 @@ if __name__ == "__main__":
         args.num_clients,
         feature_type=args.feature_type,
         fl_feature=fl_feature,
+        setup=args.setup,
         snr_level=snr_level,
         device_ratio=device_ratio,
     )
@@ -254,9 +284,9 @@ if __name__ == "__main__":
         class_num,
     ]
     if fl_feature == True:
-        save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_db"+str(args.db_level)+'.p'
+        save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_db"+str(args.db_level)+'.p'
     else:
-        save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+'.p'
+        save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+'.p'
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')
