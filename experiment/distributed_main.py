@@ -210,7 +210,7 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=4, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
     parser.add_argument('--fl_feature', type=bool, default=False,
@@ -421,16 +421,26 @@ def label_nosiy(args, train_data_local_dict, class_num):
 
         for idx in range(class_num):
             row = prob_matrix[idx*4:(idx*4)+4]
+            if len(np.where(np.array(row) == 0.5)[0]) == 2:
+                unsafe_points = np.where(np.array(row) == 0.5)[0]
+                unsafe_points = np.delete(unsafe_points, np.where(np.array(unsafe_points) == idx*5)[0])
+                available_spots = np.delete(available_spots, np.argwhere(available_spots == unsafe_points[0]))
             if np.sum(row) == 0.5:
                 logging.info('row = {}'.format(row))
                 logging.info('prob_matrix = {}'.format(prob_matrix))
                 zero_spots = np.where(np.array(row) == 0)[0]
                 logging.info('zero spot = {}'.format(zero_spots))
-                logging.info('prob_matrix[zero_spots[0] + idx * 4]={}'.format(prob_matrix[zero_spots[0] + idx * 4]))
+                logging.info('before prob_matrix[zero_spots[0] + idx * 4]={}'.format(prob_matrix[zero_spots[0] + idx * 4]))
+                logging.info('before prob_matrix[available_spots[0]]={}'.format(prob_matrix[available_spots[0]]))
                 prob_matrix[zero_spots[0] + idx * 4], prob_matrix[available_spots[0]] = prob_matrix[available_spots[0]], prob_matrix[zero_spots[0] + idx * 4]
+                logging.info('after prob_matrix[zero_spots[0] + idx * 4]={}'.format(prob_matrix[zero_spots[0] + idx * 4]))
+                logging.info('after prob_matrix[available_spots[0]]={}'.format(prob_matrix[available_spots[0]]))
                 available_spots = np.delete(available_spots, 0) 
 
         prob_matrix = np.reshape(prob_matrix, (class_num, class_num))
+
+        if key == 49:
+            logging.info('prob_matrix={}'.format(prob_matrix))
 
         for idx in range(len(prob_matrix)):
             zeros = np.count_nonzero(prob_matrix[idx]==0)
@@ -536,7 +546,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            mode="disabled",
+            # mode="disabled",
             project="fedaudio",
             entity="ultrazt",
             name=str(args.fl_algorithm)
