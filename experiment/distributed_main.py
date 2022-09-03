@@ -210,7 +210,7 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=4, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=5, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
     parser.add_argument('--fl_feature', type=bool, default=False,
@@ -219,7 +219,7 @@ def add_args(parser):
     parser.add_argument('--label_nosiy', type=bool, default=True,
                         help='clean label or nosiy label')
 
-    parser.add_argument('--label_nosiy_level', type=float, default=0.5,
+    parser.add_argument('--label_nosiy_level', type=float, default=0.3,
                         help='nosiy level for labels; 0.9 means 90% wrong')
 
     parser.add_argument('--db_level', type=float, default=20,
@@ -415,17 +415,17 @@ def label_nosiy(args, train_data_local_dict, class_num):
                 sparse_elements[idx] = np.random.choice(class_num*class_num, 1)
             prob_matrix[sparse_elements[idx]] = 0
 
-        available_spots = np.argwhere(np.array(prob_matrix) == 0.5)
+        available_spots = np.argwhere(np.array(prob_matrix) == 1 - noisy_level)
         for idx in range(class_num):
             available_spots = np.delete(available_spots, np.argwhere(available_spots == idx*5))
 
         for idx in range(class_num):
             row = prob_matrix[idx*4:(idx*4)+4]
-            if len(np.where(np.array(row) == 0.5)[0]) == 2:
-                unsafe_points = np.where(np.array(row) == 0.5)[0]
+            if len(np.where(np.array(row) == 1 - noisy_level)[0]) == 2:
+                unsafe_points = np.where(np.array(row) == 1 - noisy_level)[0]
                 unsafe_points = np.delete(unsafe_points, np.where(np.array(unsafe_points) == idx*5)[0])
                 available_spots = np.delete(available_spots, np.argwhere(available_spots == unsafe_points[0]))
-            if np.sum(row) == 0.5:
+            if np.sum(row) == 1 - noisy_level:
                 logging.info('row = {}'.format(row))
                 logging.info('prob_matrix = {}'.format(prob_matrix))
                 zero_spots = np.where(np.array(row) == 0)[0]
@@ -439,8 +439,6 @@ def label_nosiy(args, train_data_local_dict, class_num):
 
         prob_matrix = np.reshape(prob_matrix, (class_num, class_num))
 
-        if key == 49:
-            logging.info('prob_matrix={}'.format(prob_matrix))
 
         for idx in range(len(prob_matrix)):
             zeros = np.count_nonzero(prob_matrix[idx]==0)
@@ -450,6 +448,7 @@ def label_nosiy(args, train_data_local_dict, class_num):
                 prob_element = (noisy_level) / (class_num-zeros-1)
             prob_matrix[idx] = np.where(prob_matrix[idx] == 1-noisy_level, prob_element, prob_matrix[idx])
             prob_matrix[idx][idx] = 1-noisy_level
+
 
         tmp_dataset = []
         original_data = train_data_local_dict[key].dataset
