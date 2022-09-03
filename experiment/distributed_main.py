@@ -210,7 +210,7 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=10, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
     parser.add_argument('--fl_feature', type=bool, default=False,
@@ -219,7 +219,7 @@ def add_args(parser):
     parser.add_argument('--label_nosiy', type=bool, default=True,
                         help='clean label or nosiy label')
 
-    parser.add_argument('--label_nosiy_level', type=float, default=0.1,
+    parser.add_argument('--label_nosiy_level', type=float, default=0.5,
                         help='nosiy level for labels; 0.9 means 90% wrong')
 
     parser.add_argument('--db_level', type=float, default=20,
@@ -413,10 +413,23 @@ def label_nosiy(args, train_data_local_dict, class_num):
         for idx in range(len(sparse_elements)):
             while sparse_elements[idx]%(class_num+1) == 0:
                 sparse_elements[idx] = np.random.choice(class_num*class_num, 1)
-                
-        for idx in range(len(sparse_elements)):
             prob_matrix[sparse_elements[idx]] = 0
-            
+
+        available_spots = np.argwhere(np.array(prob_matrix) == 0.5)
+        for idx in range(class_num):
+            available_spots = np.delete(available_spots, np.argwhere(available_spots == idx*5))
+
+        for idx in range(class_num):
+            row = prob_matrix[idx*4:(idx*4)+4]
+            if np.sum(row) == 0.5:
+                logging.info('row = {}'.format(row))
+                logging.info('prob_matrix = {}'.format(prob_matrix))
+                zero_spots = np.where(np.array(row) == 0)[0]
+                logging.info('zero spot = {}'.format(zero_spots))
+                logging.info('prob_matrix[zero_spots[0] + idx * 4]={}'.format(prob_matrix[zero_spots[0] + idx * 4]))
+                prob_matrix[zero_spots[0] + idx * 4], prob_matrix[available_spots[0]] = prob_matrix[available_spots[0]], prob_matrix[zero_spots[0] + idx * 4]
+                available_spots = np.delete(available_spots, 0) 
+
         prob_matrix = np.reshape(prob_matrix, (class_num, class_num))
 
         for idx in range(len(prob_matrix)):
@@ -434,6 +447,7 @@ def label_nosiy(args, train_data_local_dict, class_num):
             tmp_dataset_cell = [0, 0]
             # add label nosiy
             orginal_label = original_data[i][1].numpy()
+            # logging.info('prob_matrix[orginal_label]={}'.format(prob_matrix[orginal_label]))
             new_label = np.random.choice(class_num,p=prob_matrix[orginal_label])
             tmp_dataset_cell.append(new_label)
             original_raw_data = original_data[i][0].numpy()
@@ -522,7 +536,7 @@ if __name__ == "__main__":
 
     if process_id == 0:
         wandb.init(
-            # mode="disabled",
+            mode="disabled",
             project="fedaudio",
             entity="ultrazt",
             name=str(args.fl_algorithm)
