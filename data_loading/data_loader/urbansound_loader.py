@@ -213,8 +213,8 @@ if __name__ == "__main__":
     
     parser.add_argument(
         "--fl_feature",
-        type=bool,
         default=False,
+        type=lambda x: (str(x).lower() == 'true'),
         help="Adding Federated features or not: True/False"
     )
     
@@ -290,4 +290,4 @@ if __name__ == "__main__":
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')
-# taskset 100 python
+    # taskset 100 python
