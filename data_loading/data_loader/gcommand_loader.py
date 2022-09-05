@@ -191,8 +191,8 @@ if __name__ == "__main__":
     
     parser.add_argument(
         "--fl_feature",
-        type=bool,
         default=False,
+        type=lambda x: (str(x).lower() == 'true'),
         help="Adding Federated features or not: True/False"
     )
 

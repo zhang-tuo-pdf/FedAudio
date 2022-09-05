@@ -7,6 +7,7 @@ import pdb
 from tqdm import tqdm
 from pathlib import Path
 import torch.utils.data as data
+import numpy as np
 from wandb import set_trace
 import shutil
 
@@ -19,7 +20,6 @@ from fl_feature.add_nosiy import add_noise_snr
 from data_preprocess.opensmile_extractor import opensmile_feature
 from data_preprocess.pretrain_model_extractor import pretrained_feature, load_model
 from data_preprocess.raw_audio_process import mel_spectrogram
-from data_preprocess.speaker_normalization import speaker_normalization
 
 
 def load_partition_data_audio(
@@ -162,7 +162,6 @@ def load_partition_data_audio(
     # save to 0 key
     wav_test = []
     for i in tqdm(wav_global_test):
-        # wav_global_test[i] = wav_global_test[i]
         for j in range(len(wav_global_test[i])):
             wav_test.append(wav_global_test[i][j])
     
@@ -171,11 +170,11 @@ def load_partition_data_audio(
     test_data_global = data.DataLoader(
         dataset=global_test_dataset,
         batch_size=64,
-        shuffle=False,
-        collate_fn=collate_fn_padd
+        shuffle=True,
+        collate_fn=collate_fn_padd,
     )
     test_data_num = len(wav_test)
-
+    
     return (
         train_data_num,
         test_data_num,
