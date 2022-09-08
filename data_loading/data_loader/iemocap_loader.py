@@ -29,6 +29,7 @@ def load_partition_data_audio(
     process_method,
     feature_type=None,
     fl_feature=None,
+    setup=None,
     snr_level=None,
     device_ratio=None,
 ):
@@ -38,6 +39,18 @@ def load_partition_data_audio(
     # train dataset
     logging.info("data split begin")
     wav_train_data_dict, class_num = audio_partition(folder_path, test_session=args.test_session, split='train')
+    # if setup is centralized, there is no clients
+    if setup == "centralized":
+        wav_train_data_dict[0] = list()
+        for key in wav_train_data_dict:
+            if key == 0:
+                continue
+            for idx in range(len(wav_train_data_dict[key])):
+                wav_train_data_dict[0].append(wav_train_data_dict[key][idx])
+        key_list = list(wav_train_data_dict.keys())
+        for key in key_list:
+            if key != 0: 
+                wav_train_data_dict.pop(key)
     logging.info("data split finish")
     client_idx = list(wav_train_data_dict.keys())
 
@@ -148,8 +161,8 @@ def load_partition_data_audio(
     global_test_dataset = DatasetGenerator(wav_test)
     test_data_global = data.DataLoader(
         dataset=global_test_dataset,
-        batch_size=batch_size,
-        shuffle=True,
+        batch_size=16,
+        shuffle=False,
         collate_fn=collate_fn_padd,
     )
     test_data_num = len(wav_test)
@@ -195,6 +208,20 @@ if __name__ == "__main__":
         default=20,
         help="db level for the adding nosiy",
     )
+    
+    parser.add_argument(
+        "--setup",
+        type=str,
+        default="federated",
+        help="setup of the experiment: centralized/federated",
+    )
+    
+    parser.add_argument(
+        "--fl_feature",
+        default=False,
+        type=lambda x: (str(x).lower() == 'true'),
+        help="Adding Federated features or not: True/False"
+    )
 
     args = parser.parse_args()
     
@@ -205,7 +232,9 @@ if __name__ == "__main__":
     Path(args.output_data_path).mkdir(parents=True, exist_ok=True)
     
     batch_size = 16
-    fl_feature = True
+    if args.setup != "federated":
+        batch_size = 64
+    fl_feature = args.fl_feature
     snr_level = [args.db_level]
     device_ratio = [0.4, 0.3, 0.3]
     (
@@ -224,6 +253,7 @@ if __name__ == "__main__":
         args.process_method,
         feature_type=args.feature_type,
         fl_feature=fl_feature,
+        setup=args.setup,
         snr_level=snr_level,
         device_ratio=device_ratio,
     )
@@ -238,9 +268,13 @@ if __name__ == "__main__":
         class_num,
     ]
     if fl_feature == True:
-        save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_'+str(args.test_session)+"_db"+str(args.db_level)+'.p'
+        save_file_name = (
+            args.setup+"_dataset_" + args.process_method + "_" + args.feature_type + "_"+ str(args.test_session) + "_db" + str(args.db_level) + ".p"
+        )
     else:
-        save_file_name = 'processed_dataset_'+args.process_method+'_'+args.feature_type+'_'+str(args.test_session)+'.p'
+        save_file_name = (
+            args.setup + "_dataset_" + args.process_method + "_" + args.feature_type + "_" + str(args.test_session) + ".p"
+        )
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')

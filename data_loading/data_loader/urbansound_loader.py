@@ -169,8 +169,8 @@ def load_partition_data_audio(
     global_test_dataset = DatasetGenerator(wav_test)
     test_data_global = data.DataLoader(
         dataset=global_test_dataset,
-        batch_size=64,
-        shuffle=True,
+        batch_size=16,
+        shuffle=False,
         collate_fn=collate_fn_padd,
     )
     test_data_num = len(wav_test)
