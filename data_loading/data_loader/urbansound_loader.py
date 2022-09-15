@@ -112,6 +112,7 @@ def load_partition_data_audio(
                 )
             elif process_method == "raw":
                 features = mel_spectrogram(audio_file_path)
+            features =  (features - np.mean(features, axis=0)) / (np.std(features, axis=0) + 1e-5)
             wav_train_data_dict[i][j].append(features)
     logging.info("data have been processed")
     
@@ -157,6 +158,7 @@ def load_partition_data_audio(
                 )
             elif process_method == "raw":
                 features = mel_spectrogram(audio_file_path)
+            features =  (features - np.mean(features, axis=0)) / (np.std(features, axis=0) + 1e-5)
             wav_global_test[i][j].append(features)
 
     # save to 0 key
@@ -247,7 +249,7 @@ if __name__ == "__main__":
     
     batch_size = 16
     if args.setup != "federated":
-        batch_size = 64
+        batch_size = 16
     fl_feature = args.fl_feature
     snr_level = [args.db_level]
     device_ratio = [0.4, 0.3, 0.3]

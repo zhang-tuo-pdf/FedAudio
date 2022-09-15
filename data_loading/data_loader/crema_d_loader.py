@@ -39,19 +39,6 @@ def load_partition_data_audio(
     # train dataset
     logging.info("data split begin")
     wav_train_data_dict, class_num = audio_partition(folder_path, test_fold=args.test_fold, split='train')
-    # if setup is centralized, there is no clients
-    if setup == "centralized":
-        wav_train_data_dict[0] = list()
-        for key in wav_train_data_dict:
-            if key == 0:
-                continue
-            for idx in range(len(wav_train_data_dict[key])):
-                wav_train_data_dict[0].append(wav_train_data_dict[key][idx])
-        key_list = list(wav_train_data_dict.keys())
-        for key in key_list:
-            if key != 0: 
-                wav_train_data_dict.pop(key)
-    
     logging.info("data split finish")
     client_idx = list(wav_train_data_dict.keys())
 
@@ -117,10 +104,27 @@ def load_partition_data_audio(
     test_data_local_dict = {idx: None for idx in range(len(wav_train_data_dict))}
     data_local_num_dict = {}
     train_data_num = 0
-
+    
+    # if setup is centralized, there is no clients
+    if setup == "centralized":
+        wav_train_data_dict[0] = list()
+        for key in wav_train_data_dict:
+            if key == 0:
+                continue
+            wav_train_data_dict[key] = speaker_normalization(wav_train_data_dict[key])
+            for idx in range(len(wav_train_data_dict[key])):
+                wav_train_data_dict[0].append(wav_train_data_dict[key][idx])
+        key_list = list(wav_train_data_dict.keys())
+        for key in key_list:
+            if key != 0: 
+                wav_train_data_dict.pop(key)
+    
     logging.info("loading local training data")
     for idx, key in enumerate(wav_train_data_dict):
-        train_dataset = DatasetGenerator(speaker_normalization(wav_train_data_dict[key]))
+        if setup == "centralized":
+            train_dataset = DatasetGenerator(wav_train_data_dict[key])
+        else:
+            train_dataset = DatasetGenerator(speaker_normalization(wav_train_data_dict[key]))
         train_loader = data.DataLoader(
             dataset=train_dataset,
             batch_size=batch_size,
@@ -234,7 +238,7 @@ if __name__ == "__main__":
     Path(args.output_data_path).mkdir(parents=True, exist_ok=True)
     
     if args.setup != "federated":
-        batch_size = 64
+        batch_size = 16
     fl_feature = args.fl_feature
     # snr_level = [20, 30, 40]
     snr_level = [args.db_level]

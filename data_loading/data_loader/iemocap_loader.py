@@ -9,6 +9,7 @@ from pathlib import Path
 import torch.utils.data as data
 from wandb import set_trace
 import shutil
+import copy
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
@@ -39,18 +40,6 @@ def load_partition_data_audio(
     # train dataset
     logging.info("data split begin")
     wav_train_data_dict, class_num = audio_partition(folder_path, test_session=args.test_session, split='train')
-    # if setup is centralized, there is no clients
-    if setup == "centralized":
-        wav_train_data_dict[0] = list()
-        for key in wav_train_data_dict:
-            if key == 0:
-                continue
-            for idx in range(len(wav_train_data_dict[key])):
-                wav_train_data_dict[0].append(wav_train_data_dict[key][idx])
-        key_list = list(wav_train_data_dict.keys())
-        for key in key_list:
-            if key != 0: 
-                wav_train_data_dict.pop(key)
     logging.info("data split finish")
     client_idx = list(wav_train_data_dict.keys())
 
@@ -115,10 +104,24 @@ def load_partition_data_audio(
     test_data_local_dict = {idx: None for idx in range(len(wav_train_data_dict))}
     data_local_num_dict = {}
     train_data_num = 0
+    
+    if setup == "centralized":
+        wav_train_data_dict[0] = list()
+        for key in wav_train_data_dict:
+            if key == 0: continue
+            tmp_data_dict = speaker_normalization(copy.deepcopy(wav_train_data_dict[key]))
+            for idx in range(len(tmp_data_dict)):
+                wav_train_data_dict[0].append(tmp_data_dict[idx])
+        key_list = list(wav_train_data_dict.keys())
+        for key in key_list:
+            if key != 0: wav_train_data_dict.pop(key)
 
     logging.info("loading local training data")
     for idx, key in enumerate(wav_train_data_dict):
-        train_dataset = DatasetGenerator(speaker_normalization(wav_train_data_dict[key]))
+        if setup == "centralized":
+            train_dataset = DatasetGenerator(wav_train_data_dict[key])
+        else:
+            train_dataset = DatasetGenerator(speaker_normalization(copy.deepcopy(wav_train_data_dict[key])))
         train_loader = data.DataLoader(
             dataset=train_dataset,
             batch_size=batch_size,
@@ -233,7 +236,7 @@ if __name__ == "__main__":
     
     batch_size = 16
     if args.setup != "federated":
-        batch_size = 64
+        batch_size = 16
     fl_feature = args.fl_feature
     snr_level = [args.db_level]
     device_ratio = [0.4, 0.3, 0.3]
