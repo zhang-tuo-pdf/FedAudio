@@ -31,7 +31,11 @@ class MyModelTrainer(ModelTrainer):
         model.train()
         logging.info(" Client ID " + str(client_idx) + " round Idx " + str(round_idx))
         # train and update
-        criterion = nn.CrossEntropyLoss().to(device)
+        if args.setup == "centralized":
+            criterion = nn.CrossEntropyLoss(args.weights.to(device)).to(device)
+        else:
+            criterion = nn.CrossEntropyLoss().to(device)
+        
         if args.client_optimizer == "sgd":
             optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
         else:

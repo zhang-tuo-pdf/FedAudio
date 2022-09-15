@@ -271,3 +271,53 @@ class audio_rnn(nn.Module):
         z = torch.sum(x_output, dim=1) / torch.unsqueeze(lengths, 1)
         preds = self.pred_layer(z)
         return preds
+    
+class urbansound_model(nn.Module):
+    def __init__(self, feature_size, dropout, label_size=4):
+        super(audio_conv_rnn, self).__init__()
+        self.dropout_p = dropout
+        self.pred_layer = nn.Sequential(
+            nn.Linear(128, 64), nn.ReLU(), nn.Linear(64, label_size)
+        )
+
+        self.conv = nn.Sequential(
+            nn.Conv1d(feature_size, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool1d(2),
+            nn.Conv1d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool1d(2),
+            nn.Dropout(self.dropout_p),
+        )
+
+        self.rnn = nn.GRU(
+            input_size=64,
+            hidden_size=64,
+            num_layers=1,
+            batch_first=True,
+            dropout=self.dropout_p,
+            bidirectional=True,
+        )
+
+        self.init_weight()
+
+    def init_weight(self):
+        for m in self._modules:
+            if type(m) == nn.Linear:
+                nn.init.kaiming_uniform_(m.weight, nonlinearity="relu")
+                m.bias.data.fill_(0.01)
+            if type(m) == nn.Conv1d:
+                nn.init.kaiming_uniform_(m.weight, nonlinearity="relu")
+                m.bias.data.fill_(0.01)
+
+    def forward(self, audio, lengths=None):
+        # conv module
+        audio = self.conv(audio.float().permute(0, 2, 1))
+        audio = audio.permute(0, 2, 1)
+        x_output, _ = self.rnn(audio)
+
+        # pooling based on the real sequence length
+        z = torch.mean(x_output, dim=1)
+        preds = self.pred_layer(z)
+        return preds
+
