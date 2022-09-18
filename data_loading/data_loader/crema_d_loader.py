@@ -237,6 +237,7 @@ if __name__ == "__main__":
         raise Exception("Invailid test fold, available options: 1; 2; 3; 4; 5.")
     Path(args.output_data_path).mkdir(parents=True, exist_ok=True)
     
+    batch_size = 16
     if args.setup != "federated":
         batch_size = 16
     fl_feature = args.fl_feature
