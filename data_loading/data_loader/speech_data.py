@@ -43,3 +43,33 @@ def collate_fn_padd(batch):
         torch.tensor(lens),
     )
     return data, labels, lens
+
+
+class DatasetWithKeyGenerator:
+    def __init__(self, dataset):
+        self.dataset = dataset
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, item):
+        key = self.dataset[item][1]
+        label = self.dataset[item][2]
+        data = self.dataset[item][3]
+        return torch.tensor(data), torch.tensor(int(label)), key
+
+def collate_fn_padd_with_key(batch):
+    # pad according to max_len
+    audio_max_len = max(map(lambda x: x[0].shape[0], batch))
+    data, labels, lens, keys = [], [], [], []
+    for idx in range(len(batch)):
+        data.append(pad_tensor(batch[idx][0], pad=audio_max_len))
+        labels.append(batch[idx][1])
+        lens.append(len(batch[idx][0]))
+        keys.append(batch[idx][2])
+    data, labels, lens = (
+        torch.stack(data, dim=0),
+        torch.stack(labels, dim=0),
+        torch.tensor(lens),
+    )
+    return data, labels, lens, keys

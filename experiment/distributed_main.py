@@ -216,7 +216,7 @@ def add_args(parser):
     parser.add_argument('--fl_feature', type=bool, default=False,
                         help='raw data or nosiy data')
 
-    parser.add_argument('--label_nosiy', type=bool, default=True,
+    parser.add_argument('--label_nosiy', type=bool, default=False,
                         help='clean label or nosiy label')
 
     parser.add_argument('--label_nosiy_level', type=float, default=0.5,
@@ -267,7 +267,7 @@ def load_data(args, dataset_name):
     if dataset_name == "gcommand":
         if args.fl_feature:
             save_file_name = (
-                "speech_commands/processed_dataset_"
+                "speech_commands/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -278,7 +278,7 @@ def load_data(args, dataset_name):
             logging.info("Processing the nosiy data with snr level %s" % str(args.db_level))
         else:
             save_file_name = (
-                "speech_commands/processed_dataset_"
+                "speech_commands/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -291,7 +291,7 @@ def load_data(args, dataset_name):
     if dataset_name == 'crema_d':
         if args.fl_feature:
             save_file_name = (
-                "crema_d/processed_dataset_"
+                "crema_d/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -304,7 +304,7 @@ def load_data(args, dataset_name):
             logging.info("Processing the nosiy data with snr level %s" % str(args.db_level))
         else:
             save_file_name = (
-                "crema_d/processed_dataset_"
+                "crema_d/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -318,7 +318,7 @@ def load_data(args, dataset_name):
         logging.info("dataset has been loaded from saved file")
     if dataset_name == 'urban_sound':
         save_file_name = (
-            "urban_sound/processed_dataset_"
+            "urban_sound/federated_dataset_"
             + args.process_method
             + "_"
             + args.feature_type
@@ -332,7 +332,7 @@ def load_data(args, dataset_name):
     elif dataset_name == "iemocap":
         if args.fl_feature:
             save_file_name = (
-                "iemocap/processed_dataset_"
+                "iemocap/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -345,7 +345,7 @@ def load_data(args, dataset_name):
             logging.info("Processing the nosiy data with snr level %s" % str(args.db_level))
         else:
             save_file_name = (
-                "iemocap/processed_dataset_"
+                "iemocap/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -360,7 +360,7 @@ def load_data(args, dataset_name):
         args.client_num_per_round = len(dataset[4])
     elif dataset_name == "meld":
         save_file_name = (
-                "meld/processed_dataset_"
+                "meld/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type

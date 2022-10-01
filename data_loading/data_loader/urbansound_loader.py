@@ -10,11 +10,13 @@ import torch.utils.data as data
 import numpy as np
 from wandb import set_trace
 import shutil
+import copy
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
 
 from speech_data import DatasetGenerator, collate_fn_padd
+from speech_data import DatasetWithKeyGenerator, collate_fn_padd_with_key
 from data_split.urbansound_split import audio_partition
 from fl_feature.add_nosiy import add_noise_snr
 from data_preprocess.opensmile_extractor import opensmile_feature
@@ -45,7 +47,6 @@ def load_partition_data_audio(
                                                      num_clients=num_clients)
     # if setup is centralized, there is no clients
     if setup == "centralized":
-        wav_train_data_dict[0] = list()
         for key in wav_train_data_dict:
             if key == 0:
                 continue
@@ -114,6 +115,19 @@ def load_partition_data_audio(
                 features = mel_spectrogram(audio_file_path)
             features =  (features - np.mean(features, axis=0)) / (np.std(features, axis=0) + 1e-5)
             wav_train_data_dict[i][j].append(features)
+            
+    # save to segments
+    wav_train_seg_data_dict = dict()
+    for i in tqdm(wav_train_data_dict):
+        wav_train_seg_data_dict[i] = list()
+        for j in range(len(wav_train_data_dict[i])):
+            feat_len = len(wav_train_data_dict[i][j][-1])
+            if feat_len <= 200: num_segs = 1
+            else: num_segs = int(np.around((feat_len - 200) / 100))
+            # segments of data
+            for seg_idx in range(num_segs):
+                wav_train_seg_data_dict[i].append(copy.deepcopy(wav_train_data_dict[i][j]))
+                wav_train_seg_data_dict[i][-1][-1] = wav_train_seg_data_dict[i][-1][-1][seg_idx*100:seg_idx*100+200]
     logging.info("data have been processed")
     
     # train local data and test local data
@@ -123,8 +137,8 @@ def load_partition_data_audio(
     train_data_num = 0
 
     logging.info("loading local training data")
-    for idx, key in enumerate(wav_train_data_dict):
-        train_dataset = DatasetGenerator(wav_train_data_dict[key])
+    for idx, key in enumerate(wav_train_seg_data_dict):
+        train_dataset = DatasetGenerator(wav_train_seg_data_dict[key])
         train_loader = data.DataLoader(
             dataset=train_dataset,
             batch_size=batch_size,
@@ -132,11 +146,11 @@ def load_partition_data_audio(
             collate_fn=collate_fn_padd,
         )
         train_data_local_dict[idx] = train_loader
-        train_data_num = train_data_num + len(wav_train_data_dict[key])
-        data_local_num_dict[idx] = len(wav_train_data_dict[key])
+        train_data_num = train_data_num + len(wav_train_seg_data_dict[key])
+        data_local_num_dict[idx] = len(wav_train_seg_data_dict[key])
     logging.info("finish data loading")
     train_data_global = None
-
+    
     # test dataset
     wav_global_test, class_num = audio_partition(folder_path, 
                                                  test_fold=args.test_fold, 
@@ -161,21 +175,26 @@ def load_partition_data_audio(
             features =  (features - np.mean(features, axis=0)) / (np.std(features, axis=0) + 1e-5)
             wav_global_test[i][j].append(features)
 
-    # save to 0 key
-    wav_test = []
+    wav_test_seg = []
     for i in tqdm(wav_global_test):
         for j in range(len(wav_global_test[i])):
-            wav_test.append(wav_global_test[i][j])
+            feat_len = len(wav_global_test[i][j][-1])
+            if feat_len <= 200: num_segs = 1
+            else: num_segs = int(np.around((feat_len - 200) / 100))
+            # segments of data
+            for seg_idx in range(num_segs):
+                wav_test_seg.append(copy.deepcopy(wav_global_test[i][j]))
+                wav_test_seg[-1][-1] = wav_test_seg[-1][-1][seg_idx*100:seg_idx*100+200]
     
     logging.info("test data have been processed")
-    global_test_dataset = DatasetGenerator(wav_test)
+    global_test_dataset = DatasetWithKeyGenerator(wav_test_seg)
     test_data_global = data.DataLoader(
         dataset=global_test_dataset,
         batch_size=16,
         shuffle=False,
-        collate_fn=collate_fn_padd,
+        collate_fn=collate_fn_padd_with_key,
     )
-    test_data_num = len(wav_test)
+    test_data_num = len(wav_test_seg)
     
     return (
         train_data_num,

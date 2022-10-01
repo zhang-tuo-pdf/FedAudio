@@ -4,6 +4,7 @@ import torch
 from torch import nn
 from tqdm import tqdm
 from sklearn.metrics import f1_score
+import numpy as np
 
 try:
     from fedml_core.trainer.model_trainer import ModelTrainer
@@ -31,10 +32,10 @@ class MyModelTrainer(ModelTrainer):
         model.train()
         logging.info(" Client ID " + str(client_idx) + " round Idx " + str(round_idx))
         # train and update
-        if args.setup == "centralized":
-            criterion = nn.CrossEntropyLoss(args.weights.to(device)).to(device)
-        else:
-            criterion = nn.CrossEntropyLoss().to(device)
+        # if args.setup == "centralized":
+        #    criterion = nn.CrossEntropyLoss(args.weights.to(device)).to(device)
+        # else:
+        criterion = nn.CrossEntropyLoss().to(device)
         
         if args.client_optimizer == "sgd":
             optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
@@ -72,32 +73,58 @@ class MyModelTrainer(ModelTrainer):
 
     def test(self, test_data, device, args):
         model = self.model
-
         model.to(device)
         model.eval()
 
         metrics = {"test_correct": 0, "test_loss": 0, "test_total": 0, "test_f1": 0}
         criterion = nn.CrossEntropyLoss(reduction="sum").to(device)
-
-        with torch.no_grad():
-            label_list, pred_list = list(), list()
-            for batch_idx, (data, labels, lens) in enumerate(tqdm(test_data)):
-                # for data, labels, lens in test_data:
-                data, labels, lens = data.to(device), labels.to(device), lens.to(device)
-                output = model(data, lens)
-                loss = criterion(output, labels).data.item()
-                pred = output.data.max(1, keepdim=True)[
-                    1
-                ]  # get the index of the max log-probability
-                correct = pred.eq(labels.data.view_as(pred)).sum()
-                for idx in range(len(labels)):
-                    label_list.append(labels.detach().cpu().numpy()[idx])
-                    pred_list.append(pred.detach().cpu().numpy()[idx][0])
+        
+        # we need to create aggregate predictions for urbansound
+        if args.dataset == "urban_sound":
+            with torch.no_grad():
+                label_list, pred_list = list(), list()
+                logits_dict = dict()
+                for _, (data, labels, lens, keys) in enumerate(tqdm(test_data)):
+                    # for data, labels, lens in test_data:
+                    data, labels, lens = data.to(device), labels.to(device), lens.to(device)
+                    output = model(data, lens)
+                    loss = criterion(output, labels).data.item()
+                    logits_output = nn.Softmax(dim=1)(output)
                     
-                metrics["test_correct"] += correct.item()
-                metrics["test_loss"] += loss * labels.size(0)
-                metrics["test_total"] += labels.size(0)
-        metrics["test_f1"] = f1_score(label_list, pred_list, average='macro')
+                    for idx in range(len(labels)):
+                        if keys[idx] not in logits_dict:
+                            logits_dict[keys[idx]] = dict()
+                            logits_dict[keys[idx]]["logits"] = list()
+                            logits_dict[keys[idx]]["label"] = labels.detach().cpu().numpy()[idx]
+                        logits_dict[keys[idx]]["logits"].append(logits_output.detach().cpu().numpy()[idx])
+                    metrics["test_loss"] += loss * labels.size(0)
+                    
+                for key in logits_dict:
+                    label_list.append(logits_dict[key]["label"])
+                    pred = np.argmax(np.mean(np.array(logits_dict[key]["logits"]), axis=0))
+                    pred_list.append(pred)
+                metrics["test_correct"] = np.sum(np.array(pred_list) == np.array(label_list))
+                metrics["test_total"] = len(pred_list)
+            metrics["test_f1"] = f1_score(label_list, pred_list, average='macro')
+        else:
+            with torch.no_grad():
+                label_list, pred_list = list(), list()
+                for _, (data, labels, lens) in enumerate(tqdm(test_data)):
+                    # for data, labels, lens in test_data:
+                    data, labels, lens = data.to(device), labels.to(device), lens.to(device)
+                    output = model(data, lens)
+                    loss = criterion(output, labels).data.item()
+                    pred = output.data.max(1, keepdim=True)[
+                        1
+                    ]  # get the index of the max log-probability
+                    correct = pred.eq(labels.data.view_as(pred)).sum()
+                    for idx in range(len(labels)):
+                        label_list.append(labels.detach().cpu().numpy()[idx])
+                        pred_list.append(pred.detach().cpu().numpy()[idx][0])
+                    metrics["test_correct"] += correct.item()
+                    metrics["test_loss"] += loss * labels.size(0)
+                    metrics["test_total"] += labels.size(0)
+            metrics["test_f1"] = f1_score(label_list, pred_list, average='macro')
         return metrics
 
     def test_on_the_server(
