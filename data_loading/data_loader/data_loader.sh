@@ -1,8 +1,8 @@
-for i in {1..2}
+for i in {1..10}
     do
     # process the data to the fold
-    echo "taskset 100 python3 urbansound_loader.py --raw_data_path /media/data/public-data/SoundEvent/UrbanSound8K/ --output_data_path /media/data/projects/speech-privacy/fedspeech/data/urban_sound --setup federated --fl_feature False --test_fold" $i
-    taskset 100 python3 urbansound_loader.py --raw_data_path /media/data/public-data/SoundEvent/UrbanSound8K/ --output_data_path /media/data/projects/speech-privacy/fedspeech/data/urban_sound --setup federated --fl_feature False --test_fold $i
+    echo "taskset 100 python3 urbansound_loader.py --raw_data_path /media/data/public-data/SoundEvent/UrbanSound8K/ --output_data_path /media/data/projects/speech-privacy/fedspeech/data/urban_sound --setup federated --fl_feature False --alpha 0.1 --test_fold" $i
+    taskset 100 python3 urbansound_loader.py --raw_data_path /media/data/public-data/SoundEvent/UrbanSound8K/ --output_data_path /media/data/projects/speech-privacy/fedspeech/data/urban_sound --setup federated --fl_feature False --alpha 0.1 --test_fold $i
 done
 
 # taskset 100 python3 gcommand_loader.py --raw_data_path ../../data/speech_commands --setup centralized --fl_feature False

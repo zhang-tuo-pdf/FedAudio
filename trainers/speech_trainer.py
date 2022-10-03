@@ -5,6 +5,7 @@ from torch import nn
 from tqdm import tqdm
 from sklearn.metrics import f1_score
 import numpy as np
+import pandas as pd
 
 try:
     from fedml_core.trainer.model_trainer import ModelTrainer
@@ -125,6 +126,14 @@ class MyModelTrainer(ModelTrainer):
                     metrics["test_loss"] += loss * labels.size(0)
                     metrics["test_total"] += labels.size(0)
             metrics["test_f1"] = f1_score(label_list, pred_list, average='macro')
+        
+        if args.dataset == "urban_sound":
+            if args.best_metric <= metrics["test_f1"]:
+                args.best_metric = metrics["test_f1"]
+                result_df = pd.DataFrame(index=["result"])
+                result_df["best_f1"] = args.best_metric
+                result_df.to_csv(args.csv_result_path)
+
         return metrics
 
     def test_on_the_server(

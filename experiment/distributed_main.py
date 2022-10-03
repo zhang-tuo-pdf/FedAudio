@@ -1,5 +1,6 @@
 import argparse
 import logging
+from pathlib import Path
 import os
 import random
 import socket
@@ -232,6 +233,13 @@ def add_args(parser):
 
     parser.add_argument('--server_lr', type=float, default=0.001,
                         help='server_lr')
+    
+    parser.add_argument(
+        "--alpha",
+        type=float,
+        default=0.5,
+        help="alpha in direchlet distribution",
+    )
 
     args = parser.parse_args()
     return args
@@ -324,6 +332,7 @@ def load_data(args, dataset_name):
             + args.feature_type
             + "_fold_"
             + str(args.test_fold)
+            +"_alpha"+str(args.alpha).replace(".", "")
             + ".p"
         )
         load_file_path = args.data_dir + save_file_name
@@ -553,6 +562,27 @@ if __name__ == "__main__":
     logger.info(args)
 
     if process_id == 0:
+        if args.dataset == "gcommand":
+            test_fold = ""
+        else:
+            test_fold = "-fd" + str(args.test_fold)
+        if args.dataset == "urban_sound":
+            alpha_str = "-alpha"  + str(args.alpha).replace(".", "")
+        else:
+            alpha_str = ""
+        
+        args.setting_str = str(args.fl_algorithm) + "-r" + str(args.comm_round)
+        args.setting_str += "-c" + str(args.client_num_per_round) + "-e" + str(args.epochs)
+        args.setting_str += "-lr" + str(args.lr) + "-bs" + str(args.batch_size)
+        args.setting_str += "-" + args.model + "-" + args.dataset
+        args.setting_str += "-" + args.process_method + "-" + args.feature_type
+        args.setting_str += test_fold + alpha_str
+        
+        result_path = Path.cwd().joinpath("results", "federated", args.dataset)
+        args.csv_result_path = str(result_path.joinpath(args.setting_str+".csv"))
+        Path.mkdir(Path(result_path), parents=True, exist_ok=True)
+        args.best_metric = 0
+        
         wandb.init(
             # mode="disabled",
             project="fedaudio",
@@ -575,7 +605,9 @@ if __name__ == "__main__":
             + "-"
             + args.process_method
             + "-"
-            + args.feature_type,
+            + args.feature_type
+            + test_fold
+            + alpha_str,
             config=args,
         )
 

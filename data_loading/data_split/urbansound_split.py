@@ -6,7 +6,7 @@ from tqdm import tqdm
 from pathlib import Path
 from sklearn.model_selection import KFold
 
-def audio_partition(folder_path, test_fold=1, split='train', num_clients=50):
+def audio_partition(folder_path, test_fold=1, split='train', num_clients=50, alpha=0.5):
     # get audio files
     audio_file_paths = list(Path(folder_path).joinpath('audio').glob('*/*.wav'))
     unique_file_dict = dict()
@@ -49,7 +49,7 @@ def audio_partition(folder_path, test_fold=1, split='train', num_clients=50):
             for k in range(K):
                 idx_k = np.where(np.array(file_label_list) == k)[0]
                 np.random.shuffle(idx_k)
-                proportions = np.random.dirichlet(np.repeat(0.1, num_clients))
+                proportions = np.random.dirichlet(np.repeat(alpha, num_clients))
                 # Balance
                 proportions = np.array([p*(len(idx_j)<N/num_clients) for p, idx_j in zip(proportions, file_idx_clients)])
                 proportions = proportions / proportions.sum()

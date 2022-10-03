@@ -44,6 +44,7 @@ def load_partition_data_audio(
     wav_train_data_dict, class_num = audio_partition(folder_path, 
                                                      test_fold=args.test_fold, 
                                                      split='train', 
+                                                     alpha=args.alpha,
                                                      num_clients=num_clients)
     # if setup is centralized, there is no clients
     if setup == "centralized":
@@ -122,17 +123,17 @@ def load_partition_data_audio(
         wav_train_seg_data_dict[i] = list()
         for j in range(len(wav_train_data_dict[i])):
             feat_len = len(wav_train_data_dict[i][j][-1])
-            if feat_len <= 200: num_segs = 1
-            else: num_segs = int(np.around((feat_len - 200) / 100))
+            if feat_len <= 300: num_segs = 1
+            else: num_segs = int(np.around((feat_len - 300) / 50))
             # segments of data
             for seg_idx in range(num_segs):
                 wav_train_seg_data_dict[i].append(copy.deepcopy(wav_train_data_dict[i][j]))
-                wav_train_seg_data_dict[i][-1][-1] = wav_train_seg_data_dict[i][-1][-1][seg_idx*100:seg_idx*100+200]
+                wav_train_seg_data_dict[i][-1][-1] = wav_train_seg_data_dict[i][-1][-1][seg_idx*50:seg_idx*50+300]
     logging.info("data have been processed")
     
     # train local data and test local data
     train_data_local_dict = {}
-    test_data_local_dict = {idx: None for idx in range(len(wav_train_data_dict))}
+    test_data_local_dict = {idx: None for idx in range(len(wav_train_seg_data_dict))}
     data_local_num_dict = {}
     train_data_num = 0
 
@@ -154,7 +155,7 @@ def load_partition_data_audio(
     # test dataset
     wav_global_test, class_num = audio_partition(folder_path, 
                                                  test_fold=args.test_fold, 
-                                                 split='test', 
+                                                 split='test',
                                                  num_clients=num_clients)
     
     # step 2 preprocess data
@@ -179,13 +180,14 @@ def load_partition_data_audio(
     for i in tqdm(wav_global_test):
         for j in range(len(wav_global_test[i])):
             feat_len = len(wav_global_test[i][j][-1])
-            if feat_len <= 200: num_segs = 1
-            else: num_segs = int(np.around((feat_len - 200) / 100))
+            if feat_len <= 300: num_segs = 1
+            else: num_segs = int(np.around((feat_len - 300) / 100))
             # segments of data
             for seg_idx in range(num_segs):
-                wav_test_seg.append(copy.deepcopy(wav_global_test[i][j]))
-                wav_test_seg[-1][-1] = wav_test_seg[-1][-1][seg_idx*100:seg_idx*100+200]
-    
+                seg_data = copy.deepcopy(wav_global_test[i][j])
+                seg_data[-1] = copy.deepcopy(wav_global_test[i][j])[-1][seg_idx*100:seg_idx*100+300]
+                wav_test_seg.append(seg_data)
+                
     logging.info("test data have been processed")
     global_test_dataset = DatasetWithKeyGenerator(wav_test_seg)
     test_data_global = data.DataLoader(
@@ -248,6 +250,13 @@ if __name__ == "__main__":
         default=10,
         help="db level for the adding nosiy",
     )
+    
+    parser.add_argument(
+        "--alpha",
+        type=float,
+        default=0.5,
+        help="alpha in direchlet distribution",
+    )
 
     parser.add_argument(
         "--setup",
@@ -304,9 +313,9 @@ if __name__ == "__main__":
         class_num,
     ]
     if fl_feature == True:
-        save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_db"+str(args.db_level)+'.p'
+        save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_alpha"+str(args.alpha).replace(".", "")+"_db"+str(args.db_level)+'.p'
     else:
-        save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+'.p'
+        save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_alpha"+str(args.alpha).replace(".", "")+'.p'
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')
