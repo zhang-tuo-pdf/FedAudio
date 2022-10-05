@@ -5,6 +5,7 @@ import pickle
 from tqdm import tqdm
 from pathlib import Path
 import argparse
+import shutil
 import numpy as np
 import torch.utils.data as data
 
@@ -53,6 +54,8 @@ def load_partition_data_audio(
     if fl_feature:
         logging.info("add federated learning related features")
         output_folder = os.path.join(folder_path, "fl_dataset/")
+        if os.path.isdir(output_folder):
+            shutil.rmtree(output_folder)   
         if not os.path.isdir(output_folder):
             # step 1 create fl dataset
             logging.info("create federated learning dataset")
@@ -191,7 +194,7 @@ if __name__ == "__main__":
     
     parser.add_argument(
         "--fl_feature",
-        default=False,
+        default=True,
         type=lambda x: (str(x).lower() == 'true'),
         help="Adding Federated features or not: True/False"
     )
@@ -206,7 +209,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--db_level",
         type=float,
-        default=20,
+        default=30,
         help="db level for the adding nosiy",
     )
     
