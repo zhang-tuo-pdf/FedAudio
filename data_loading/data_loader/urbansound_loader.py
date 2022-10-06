@@ -315,7 +315,11 @@ if __name__ == "__main__":
     if fl_feature == True:
         save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_alpha"+str(args.alpha).replace(".", "")+"_db"+str(args.db_level)+'.p'
     else:
-        save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_alpha"+str(args.alpha).replace(".", "")+'.p'
+        if args.setup == "federated":
+            save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+"_alpha"+str(args.alpha).replace(".", "")+'.p'
+        else:
+            save_file_name = args.setup+'_dataset_'+args.process_method+'_'+args.feature_type+'_fold_'+str(args.test_fold)+'.p'
+    
     save_data_path = Path(args.output_data_path).joinpath(save_file_name)
     pickle.dump(dataset, open(save_data_path, "wb"))
     print('data finished')

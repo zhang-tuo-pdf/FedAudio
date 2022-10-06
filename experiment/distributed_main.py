@@ -162,7 +162,7 @@ def add_args(parser):
     parser.add_argument(
         "--frequency_of_the_test",
         type=int,
-        default=5,
+        default=2,
         help="the frequency of the algorithms",
     )
 
@@ -233,6 +233,13 @@ def add_args(parser):
 
     parser.add_argument('--server_lr', type=float, default=0.001,
                         help='server_lr')
+    
+    parser.add_argument(
+        "--setup",
+        type=str,
+        default="federated",
+        help="setup of the experiment: centralized/federated",
+    )
     
     parser.add_argument(
         "--alpha",
@@ -567,16 +574,21 @@ if __name__ == "__main__":
         else:
             test_fold = "-fd" + str(args.test_fold)
         if args.dataset == "urban_sound":
-            alpha_str = "-alpha"  + str(args.alpha).replace(".", "")
+            alpha_str = "-alpha" + str(args.alpha).replace(".", "")
         else:
             alpha_str = ""
+        
+        if args.label_nosiy:
+            label_noise_str = "-ln" + str(args.label_nosiy_level).replace(".", "")
+        else:
+            label_noise_str = ""
         
         args.setting_str = str(args.fl_algorithm) + "-r" + str(args.comm_round)
         args.setting_str += "-c" + str(args.client_num_per_round) + "-e" + str(args.epochs)
         args.setting_str += "-lr" + str(args.lr) + "-bs" + str(args.batch_size)
         args.setting_str += "-" + args.model + "-" + args.dataset
         args.setting_str += "-" + args.process_method + "-" + args.feature_type
-        args.setting_str += test_fold + alpha_str
+        args.setting_str += test_fold + alpha_str + label_noise_str
         
         result_path = Path.cwd().joinpath("results", "federated", args.dataset)
         args.csv_result_path = str(result_path.joinpath(args.setting_str+".csv"))
@@ -607,7 +619,8 @@ if __name__ == "__main__":
             + "-"
             + args.feature_type
             + test_fold
-            + alpha_str,
+            + alpha_str
+            + label_noise_str,
             config=args,
         )
 

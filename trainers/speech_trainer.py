@@ -39,7 +39,12 @@ class MyModelTrainer(ModelTrainer):
         criterion = nn.CrossEntropyLoss().to(device)
         
         if args.client_optimizer == "sgd":
-            optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
+            if args.setup == "federated":
+                optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
+            elif args.setup == "centralized":
+                lr_scaler = np.power(2, int(round_idx/5))
+                lr = 0.0005 if float(args.lr / lr_scaler) < 0.0005 else float(args.lr / lr_scaler)
+                optimizer = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=1e-4)
         else:
             optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
@@ -127,13 +132,12 @@ class MyModelTrainer(ModelTrainer):
                     metrics["test_total"] += labels.size(0)
             metrics["test_f1"] = f1_score(label_list, pred_list, average='macro')
         
-        if args.dataset == "urban_sound":
-            if args.best_metric <= metrics["test_f1"]:
-                args.best_metric = metrics["test_f1"]
-                result_df = pd.DataFrame(index=["result"])
-                result_df["best_f1"] = args.best_metric
-                result_df.to_csv(args.csv_result_path)
-
+        if args.best_metric <= metrics["test_f1"]:
+            args.best_metric = metrics["test_f1"]
+            result_df = pd.DataFrame(index=["result"])
+            result_df["best_f1"] = args.best_metric
+            result_df.to_csv(args.csv_result_path)
+        
         return metrics
 
     def test_on_the_server(
