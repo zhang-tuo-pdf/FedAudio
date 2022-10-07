@@ -211,10 +211,10 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        '--test_fold', type=int, default=2, help='Test fold id for Crema-D dataset, default test fold is 1'
+        '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
-    parser.add_argument('--fl_feature', type=bool, default=False,
+    parser.add_argument('--fl_feature', type=bool, default=True,
                         help='raw data or nosiy data')
 
     parser.add_argument('--label_nosiy', type=bool, default=False,
@@ -223,7 +223,7 @@ def add_args(parser):
     parser.add_argument('--label_nosiy_level', type=float, default=0.5,
                         help='nosiy level for labels; 0.9 means 90% wrong')
 
-    parser.add_argument('--db_level', type=float, default=20,
+    parser.add_argument('--db_level', type=float, default=10,
                         help='snr level for the audio (20,30,40)')
 
     parser.add_argument("--ci", type=int, default=0, help="CI")
@@ -244,7 +244,7 @@ def add_args(parser):
     parser.add_argument(
         "--alpha",
         type=float,
-        default=0.5,
+        default=0.1,
         help="alpha in direchlet distribution",
     )
 
@@ -332,19 +332,36 @@ def load_data(args, dataset_name):
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
     if dataset_name == 'urban_sound':
-        save_file_name = (
-            "urban_sound/federated_dataset_"
-            + args.process_method
-            + "_"
-            + args.feature_type
-            + "_fold_"
-            + str(args.test_fold)
-            +"_alpha"+str(args.alpha).replace(".", "")
-            + ".p"
-        )
-        load_file_path = args.data_dir + save_file_name
-        dataset = pickle.load(open(load_file_path, "rb"))
-        logging.info("dataset has been loaded from saved file")
+        if args.fl_feature:
+            save_file_name = (
+                "urban_sound/federated_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + "_fold_"
+                + str(args.test_fold)
+                +"_alpha"+str(args.alpha).replace(".", "")
+                +"_db"+str(args.db_level)
+                + ".p"
+            )
+            load_file_path = args.data_dir + save_file_name
+            dataset = pickle.load(open(load_file_path, "rb"))
+            logging.info("dataset has been loaded from saved file")
+            logging.info("Processing the nosiy data with snr level %s" % save_file_name)
+        else:
+            save_file_name = (
+                "urban_sound/federated_dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + "_fold_"
+                + str(args.test_fold)
+                +"_alpha"+str(args.alpha).replace(".", "")
+                + ".p"
+            )
+            load_file_path = args.data_dir + save_file_name
+            dataset = pickle.load(open(load_file_path, "rb"))
+            logging.info("dataset has been loaded from saved file")
     elif dataset_name == "iemocap":
         if args.fl_feature:
             save_file_name = (
