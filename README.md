@@ -40,3 +40,57 @@ brew install git-lfs
 ## Supported Dataset
 Currently, FedAudio encompasses four audio datasets (Google Speech Command, IEMOCAP, CREMA-D, Urban Sound) with client partition, covering three common tasks, and accompanied by baseline training code and results. We would continue enriching the package with datasets and baseline from other applications to support more research scenarios. Please leave an message to us if you want to contribute or have some suggestions for the package development.
 
+### Data Downloading
+For most of the dataset, user could directly download by the given bash file. Take the Google Speech Command as instance:
+```
+cd data/speech_commands
+bash download_audio.sh
+```
+For IEMOCAP dataset, please follow its offical website for the access.
+
+https://sail.usc.edu/iemocap/iemocap_release.htm
+
+### Data Loading Framework
+In the FedAudio package, all the dataset loading would follow the below procedure:
+
+raw data -> data split -> adding fl feature (optional) -> preprocess -> torch dataloader
+
+The output from the data split phase would look like this: [key, wav_command, word_id]. 
+
+For example: ['004ae714_nohash_1_zero', '../data/speech_commands/audio/zero/004ae714_nohash_1.wav',  34]
+
+### Data Preprocess
+In the prepossessing data phase, FedAudio is compatible with OpenSMILE toolkit, SUPERB toolkit, and frequency-based feature extracting techniques such as mfcc and Mel Spectrograms. With the modular design, user could freely select the desired way for the feature extraction in the loader file. For example, for the Google Command dataset, the code for the preprocessing is below:
+
+```
+cd data_loading/data_loader
+taskset 100 python gcommand_loader.py
+```
+
+Inside the gcommand_loader.py, user could change the variables such as 'process_method' to match customized needs. The loader file would generate a bin file to storage the processed data, so the user do not need to run the loader file everytime before running FL experiments.
+
+### FL Feature Manager
+
+## Usage
+step 1: load the dataset
+```
+cd data_loading/data_loader
+python gcommand_loader.py
+```
+step 2: run the fl training
+```
+cd experiment
+sh run_distributed.sh gcommand 2118 10 8 30 1 16 0.1 0 8
+# dataset name, total client number, sampled client number, gpu number, round number, local epoch number, batch size, lr, start gpu, total gpu
+```
+
+## Contact
+Feel free to contact us!
+
+Tuo Zhang tuozhang@usc.edu
+
+Tiantian Feng tiantiaf@usc.edu 
+
+Special Thanks to Samiul Alam!
+
+
