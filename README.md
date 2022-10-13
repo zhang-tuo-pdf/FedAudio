@@ -71,6 +71,17 @@ Inside the gcommand_loader.py, user could change the variables such as 'process_
 
 ### FL Feature Manager
 
+Currenly, we support two different kinds of noisy, SNR noisy and label noisy.
+
+#### SNR noise
+To work with the SNR noise, please follow the steps below:
+1. In the loader.py file for each dataset (inside data_loading/data_loader), make the **"fl_feature"** to true and set the desired the noisy level in **"db_level"**.
+2. In the main file (experiment/distributed_main.py), set the **'fl_feature'** to true and **'db_level'** to the same number in the data loading phase.
+
+#### Label noise
+To work with the noisy noise, please follow the steps below:
+1. In the main file (experiment/distributed_main.py), set the **'label_nosiy'** to true and **'label_nosiy_level'** to the desired noisy level number. We do not need to reproduce the processed data bin file for the label noisy signals.
+
 ## Usage
 step 1: load the dataset
 ```
