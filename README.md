@@ -26,7 +26,7 @@ In our repo, we include an unoffical offline version of FedML as an example to i
 
 To begin with, please clone this repo and install the conda environment:
 ```
-git clone https://github.com/zhang-tuo-pdf/FedSpeech22.git
+git clone https://github.com/zhang-tuo-pdf/FedAudio.git
 cd FedSpeech22
 conda env create -f fedspeech.yml
 conda activate fedml
