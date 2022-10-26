@@ -85,6 +85,12 @@ To work with the noisy noise, please follow the steps below:
 1. In the main file (experiment/distributed_main.py), set the **'label_nosiy'** to true and **'label_nosiy_level'** to the desired noisy level number. We do not need to reproduce the processed data bin file for the label noisy signals.
 
 ## Usage
+step 0: download the dataset
+```
+cd data/speech_commands
+bash download_audio.sh
+```
+
 step 1: load the dataset
 ```
 cd data_loading/data_loader
