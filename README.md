@@ -13,8 +13,9 @@ Therefore, we present FedAudio, a benchmark guideline suite for evaluating feder
 
 
 The FedAudio package contains:
-* Data loaders with various types of data preprocessing methods and automatically partitioning.
 * FL feature managers to inject noise on top of the raw signal to simulate the realstic FL challenges.
+* Pre-processing Manager supports not only conventional frequency-based features (e.g., Mel-frequency cepstral coefficients (MFCC), Mel Spectrograms) and knowledge-based speech features (e.g., pitch) but also deep audio representations from pre-trained models.
+* Data Splitter includes various types of data partitioning.
 * Baseline evaluation results and code with popular aggregation functions.
 
 <div align="center">
