@@ -1,4 +1,4 @@
-# FedAudio: FedAudio: A Federated Learning Benchmark for Audio Tasks
+# FedAudio: A Federated Learning Benchmark for Audio Tasks
 
 ## Table of Contents
 * Overview
