@@ -12,7 +12,7 @@ Federated Learning has gained considerable interest in enabling multiple clients
 Therefore, we present FedAudio, a benchmark guideline suite for evaluating federated learning methods on audio tasks. 
 
 
-The FLamby package contains:
+The FedAudio package contains:
 * Data loaders with various types of data preprocessing methods and automatically partitioning.
 * FL feature managers to inject noise on top of the raw signal to simulate the realstic FL challenges.
 * Baseline evaluation results and code with popular aggregation functions.
