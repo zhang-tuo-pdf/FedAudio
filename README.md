@@ -100,7 +100,7 @@ step 2: run the fl training
 ```
 cd experiment
 sh run_distributed.sh gcommand 2118 10 8 30 1 16 0.1 0 8
-# dataset name, total client number, sampled client number, gpu number, round number, local epoch number, batch size, lr, start gpu, total gpu
+# dataset name, total client number, sampled client number, gpu number for running, round number, local epoch number, batch size, lr, start gpu, total gpu number in machine
 ```
 
 ## Contact
