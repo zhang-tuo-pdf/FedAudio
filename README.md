@@ -25,7 +25,7 @@ The FedAudio package contains:
 ## Installation
 In our repo, we include an unoffical offline version of FedML as an example to implement the FedAudio. Users could directly clone our repo and run the code without installing any other federated learning frameworks.
 
-**This work, FedAudio, is independent to the FedML Inc.**
+We would mitigrate to the lastest FedML package together with the FedML team.
 
 To begin with, please clone this repo and install the conda environment:
 ```
