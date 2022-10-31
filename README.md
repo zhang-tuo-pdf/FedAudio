@@ -104,6 +104,16 @@ sh run_distributed.sh gcommand 2118 10 8 30 1 16 0.1 0 8
 ```
 
 ## Contact
+
+If you like our works, please cite our paper in your publications.
+```
+@inproceedings{Zhang2022FedAudioAF,
+  title={FedAudio: A Federated Learning Benchmark for Audio Tasks},
+  author={Tuo Zhang and Tiantian Feng and Samiul Alam and Sunwoo Lee and Mi Zhang and Shrikanth S. Narayanan and Salman Avestimehr},
+  year={2022}
+}
+```
+
 Feel free to contact us!
 
 Tuo Zhang tuozhang@usc.edu
