@@ -11,6 +11,8 @@
 Federated Learning has gained considerable interest in enabling multiple clients holding sensitive data to collaboratively train machine learning models without centralizing data. However, while many works have addressed the application of audio tasks with FL, few realistic FL datasets exist as benchmarks for algorithmic research. 
 Therefore, we present FedAudio, a benchmark libarary for evaluating federated learning methods on audio tasks. 
 
+Paper Link: https://arxiv.org/pdf/2210.15707.pdf
+
 
 The FedAudio package contains:
 * FL feature managers to inject noise on top of the raw signal to simulate the realstic FL challenges.
