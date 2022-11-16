@@ -214,7 +214,7 @@ def add_args(parser):
         '--test_fold', type=int, default=1, help='Test fold id for Crema-D dataset, default test fold is 1'
     )
 
-    parser.add_argument('--fl_feature', type=bool, default=True,
+    parser.add_argument('--fl_feature', type=bool, default=False,
                         help='raw data or nosiy data')
 
     parser.add_argument('--label_nosiy', type=bool, default=False,
