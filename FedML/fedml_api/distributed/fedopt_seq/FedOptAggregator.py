@@ -1,3 +1,6 @@
+# based on the original fedopt inside the fedml repo, we add the sequential training on top of the fedopt, which means that each process could
+# represents multiple clients during the training.
+
 import copy
 import logging
 import random
