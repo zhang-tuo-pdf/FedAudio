@@ -21,7 +21,7 @@ The FedAudio package contains:
 * Baseline evaluation results and code with popular aggregation functions.
 
 <div align="center">
- <img src="FedAudio.png" width="600px">
+ <img src="FedAudio_new.png" width="600px">
 </div>
 
 ## Installation
