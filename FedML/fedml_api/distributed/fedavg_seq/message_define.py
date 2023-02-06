@@ -1,7 +1,4 @@
-# based on the original fedavg_seq inside the FedML repo (https://github.com/FedML-AI/FedML/tree/master/python/fedml/simulation/mpi/fedavg_seq)
-# and one of the forked version of FedML repo (https://github.com/wizard1203/FedML/tree/master/python/fedml/simulation/mpi/fedavg_seq)
-# we add the sequential training on top of the fedavg, which means that each process could represent multiple clients during the training.
-# we also change the test function for the F1 score test.
+# This is a copied version of message_define.py (https://github.com/wizard1203/FedML/blob/master/python/fedml/simulation/mpi/fedavg_seq/message_define.py)
 
 
 class MyMessage(object):
