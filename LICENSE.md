@@ -207,5 +207,5 @@
    --------------------------------------
    FedAudio/FedML/*
    
-   FedAudio/data_loading/data_preprocess/s3prl*
+   FedAudio/data_loading/data_preprocess/s3prl/*
    
