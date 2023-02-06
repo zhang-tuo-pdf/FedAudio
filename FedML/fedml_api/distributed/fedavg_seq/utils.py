@@ -1,3 +1,6 @@
+# based on the original fedavg_seq inside the fedml repo (https://github.com/FedML-AI/FedML/tree/master/python/fedml/simulation/mpi/fedavg_seq), 
+# we add the sequential training on top of the fedavg, which means that each process could represent multiple clients during the training.
+
 import os
 
 import numpy as np
