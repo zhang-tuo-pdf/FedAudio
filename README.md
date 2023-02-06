@@ -25,7 +25,7 @@ The FedAudio package contains:
 </div>
 
 ## Installation
-In our repo, we include FedML open source software as the federated learning framework to implement the FedAudio. Users could directly clone our repo and run the code without installing any other federated learning frameworks.
+In our repo, we include FedML open source software (https://github.com/FedML-AI/FedML) as the federated learning framework to implement the FedAudio. Users could directly clone our repo and run the code without installing any other federated learning frameworks.
 
 
 To begin with, please clone this repo and install the conda environment:
