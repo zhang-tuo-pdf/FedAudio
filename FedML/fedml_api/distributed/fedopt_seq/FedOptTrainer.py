@@ -1,3 +1,6 @@
+# based on the original fedopt inside the fedml repo, we add the sequential training on top of the fedopt, which means that each process could
+# represent multiple clients during the training.
+
 from .utils import transform_tensor_to_list
 
 
