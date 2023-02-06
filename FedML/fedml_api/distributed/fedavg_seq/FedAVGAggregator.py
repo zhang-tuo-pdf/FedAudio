@@ -1,8 +1,6 @@
-```
-This file is a modified version of fedavg_seq (https://github.com/wizard1203/FedML/blob/master/python/fedml/simulation/mpi/fedavg_seq/FedAVGAggregator.py)
-(https://github.com/FedML-AI/FedML/tree/master/python/fedml/simulation/mpi/fedavg_seq)
-where we made change on the test function for F1 score and change the average function from weighted averge to mean average.
-```
+#This file is a modified version of fedavg_seq (https://github.com/wizard1203/FedML/blob/master/python/fedml/simulation/mpi/fedavg_seq/FedAVGAggregator.py)
+#(https://github.com/FedML-AI/FedML/tree/master/python/fedml/simulation/mpi/fedavg_seq)
+#where we made change on the test function for F1 score and change the average function from weighted averge to mean average.
 
 
 
