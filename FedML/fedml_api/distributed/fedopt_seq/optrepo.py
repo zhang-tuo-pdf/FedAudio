@@ -1,5 +1,4 @@
-# based on the original fedopt inside the fedml repo, we add the sequential training on top of the fedopt, which means that each process could
-# represent multiple clients during the training.
+# This is a copied version of optrepo.py (https://github.com/FedML-AI/FedML/blob/0ae43766454c3932a51c1c6b6a72eaa84c957eb0/fedml_api/distributed/fedopt/optrepo.py)
 
 import logging
 from typing import List, Union
