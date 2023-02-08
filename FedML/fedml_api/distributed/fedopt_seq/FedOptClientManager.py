@@ -1,5 +1,5 @@
-# based on the original fedopt inside the fedml repo, we add the sequential training on top of the fedopt, which means that each process could
-# represent multiple clients during the training.
+# This file is a modified version of FedAvgClientManager.py (https://github.com/wizard1203/FedML/blob/master/python/fedml/simulation/mpi/fedavg_seq/FedAvgClientManager.py)
+# where we changed the path for the import from line 5 to line 17, and change the class name at line 23 to FedOptClientManager
 
 
 import logging
