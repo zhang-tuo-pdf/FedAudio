@@ -1,5 +1,4 @@
-# based on the original fedopt inside the fedml repo, we add the sequential training on top of the fedopt, which means that each process could
-# represent multiple clients during the training.
+# This is a copied version of utils.py (https://github.com/wizard1203/FedML/blob/master/python/fedml/simulation/mpi/fedavg_seq/utils.py)
 
 import os
 
