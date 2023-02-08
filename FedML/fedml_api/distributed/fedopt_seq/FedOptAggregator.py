@@ -1,5 +1,7 @@
-# based on the original fedopt inside the fedml repo, we add the sequential training on top of the fedopt, which means that each process could
-# represent multiple clients during the training.
+# This file is a modified version of fedavg_seq (https://github.com/wizard1203/FedML/blob/master/python/fedml/simulation/mpi/fedavg_seq/FedAVGAggregator.py)
+# where we made change on the test function for F1 score and change the average function for model aggregation from weighted averge to mean average,
+# and replace the fedavg aggreagtor to fedopt aggregator
+
 
 import copy
 import logging
