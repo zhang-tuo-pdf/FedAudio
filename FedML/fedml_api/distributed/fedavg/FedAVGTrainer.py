@@ -1,3 +1,6 @@
+# This is a modified version of https://github.com/FedML-AI/FedML/blob/0ae43766454c3932a51c1c6b6a72eaa84c957eb0/fedml_api/distributed/fedavg/FedAVGTrainer.py
+# where we change the variables from line 26 to 28 to none, add a function from line 36 to 38, and introduce a new input at line 48
+
 from .utils import transform_tensor_to_list
 
 
