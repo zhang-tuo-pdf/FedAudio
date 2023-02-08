@@ -1,4 +1,5 @@
-# based on the orignial fedml repo, we add the F1 score test in here.
+# this a modified verison of FedAvgAggregator.py (https://github.com/FedML-AI/FedML/blob/0ae43766454c3932a51c1c6b6a72eaa84c957eb0/fedml_api/distributed/fedavg/FedAVGAggregator.py),
+# where we edit the test function.
 
 import copy
 import logging
