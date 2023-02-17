@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
 
 from speech_data import DatasetGenerator, collate_fn_padd
 from data_split.gcommand_split import audio_partition
-from fl_feature.add_nosiy import add_noise_snr
+from fl_feature.add_nosiy import add_noise_snr, add_esc_snr
 from data_preprocess.opensmile_extractor import opensmile_feature
 from data_preprocess.pretrain_model_extractor import pretrained_feature, load_model
 from data_preprocess.raw_audio_process import mfcc, mel_spectrogram
@@ -25,6 +25,7 @@ def load_partition_data_audio(
     process_method,
     feature_type=None,
     fl_feature=None,
+    env_feature=None,
     snr_level=None,
     setup=None,
     device_ratio=None,
@@ -83,6 +84,38 @@ def load_partition_data_audio(
                     wav_train_data_dict[i][j][1] = output_file_path
     logging.info("federated learning feature loaded")
 
+    if env_feature:
+        logging.info("add non-stationary noise")
+        output_folder = os.path.join(folder_path, "fl_esc_dataset/")
+        if os.path.isdir(output_folder):
+            shutil.rmtree(output_folder)   
+        if not os.path.isdir(output_folder):
+            # step 1 create fl dataset
+            logging.info("create esc federated learning dataset")
+            target_snr_db = [0] * len(wav_train_data_dict)
+            start = 0
+            for i in range(len(device_ratio)):
+                end = start + device_ratio[i]
+                target_snr_db[start:end] = [snr_level[i]] * device_ratio[i]
+                start = end
+            Path.mkdir(Path(output_folder), parents=True, exist_ok=True)
+            for i in tqdm(range(len(wav_train_data_dict))):
+                for j in range(len(wav_train_data_dict[i])):
+                    audio_file_path = "../" + wav_train_data_dict[i][j][1]
+                    output_file_path = (
+                        output_folder + wav_train_data_dict[i][j][0] + ".wav"
+                    )
+                    add_esc_snr(audio_file_path, output_file_path, target_snr_db[i])
+                    wav_train_data_dict[i][j][1] = output_file_path
+        else:
+            for i in tqdm(range(len(wav_train_data_dict))):
+                for j in range(len(wav_train_data_dict[i])):
+                    output_file_path = (
+                        output_folder + wav_train_data_dict[i][j][0] + ".wav"
+                    )
+                    wav_train_data_dict[i][j][1] = output_file_path
+    logging.info("non-stationary noise feature loaded")
+
     # step 2 preprocess data
     logging.info("begin data preprocess")
     if process_method == "pretrain":
@@ -90,6 +123,8 @@ def load_partition_data_audio(
     for i in tqdm(range(len(wav_train_data_dict))):
         for j in range(len(wav_train_data_dict[i])):
             if fl_feature:
+                audio_file_path = wav_train_data_dict[i][j][1]
+            elif env_feature:
                 audio_file_path = wav_train_data_dict[i][j][1]
             else:
                 audio_file_path = "../" + wav_train_data_dict[i][j][1]
@@ -200,6 +235,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--env_feature",
+        default=True,
+        type=lambda x: (str(x).lower() == 'true'),
+        help="Adding esc-50 features or not: True/False"
+    )
+
+    parser.add_argument(
         "--feature_type",
         type=str,
         default="mel_spec",
@@ -209,7 +251,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--db_level",
         type=float,
-        default=30,
+        default=20,
         help="db level for the adding nosiy",
     )
     
@@ -243,6 +285,7 @@ if __name__ == "__main__":
         batch_size,
         args.process_method,
         feature_type=args.feature_type,
+        env_feature=args.env_feature,
         setup=args.setup,
         fl_feature=fl_feature,
         snr_level=snr_level,
@@ -261,6 +304,10 @@ if __name__ == "__main__":
     if fl_feature == True:
         save_file_name = (
             args.setup+"_dataset_" + args.process_method + "_" + args.feature_type + "_db" + str(args.db_level) + ".p"
+        )
+    elif args.env_feature == True:
+        save_file_name = (
+            args.setup+"_esc50_"+"_dataset_" + args.process_method + "_" + args.feature_type + "_db" + str(args.db_level) + ".p"
         )
     else:
         save_file_name = (
