@@ -1,4 +1,4 @@
-# FedAudio: A Federated Learning Benchmark for Audio Tasks
+# FedAudio: A Federated Learning Benchmark for Audio Tasks (ICASSP 2023)
 
 ## Table of Contents
 * Overview
