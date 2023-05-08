@@ -15,4 +15,6 @@ label_dim_dict = {
     "crema_d": 4,
     "meld": 3,
     "urban_sound": 10,
+    "esc50": 50,
+    "gtzan": 10
 }
