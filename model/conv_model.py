@@ -159,26 +159,28 @@ class audio_conv(nn.Module):
 
 
 class audio_conv_rnn(nn.Module):
-    def __init__(self, feature_size, dropout, label_size=4):
+    def __init__(self, feature_size, dropout, label_size=4, hidden_size=128):
         super(audio_conv_rnn, self).__init__()
         self.dropout_p = dropout
         self.pred_layer = nn.Sequential(
-            nn.Linear(128, 64), nn.ReLU(), nn.Linear(64, label_size)
+            nn.Linear(hidden_size*2, hidden_size), 
+            nn.ReLU(), 
+            nn.Linear(hidden_size, label_size)
         )
 
         self.conv = nn.Sequential(
-            nn.Conv1d(feature_size, 32, kernel_size=3, padding=1),
+            nn.Conv1d(feature_size, hidden_size//2, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(2),
-            nn.Conv1d(32, 64, kernel_size=3, padding=1),
+            nn.Conv1d(hidden_size//2, hidden_size, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(2),
             nn.Dropout(self.dropout_p),
         )
 
         self.rnn = nn.GRU(
-            input_size=64,
-            hidden_size=64,
+            input_size=hidden_size,
+            hidden_size=hidden_size,
             num_layers=1,
             batch_first=True,
             dropout=self.dropout_p,
