@@ -31,7 +31,7 @@ In our repo, we include FedML open source software (https://github.com/FedML-AI/
 To begin with, please clone this repo and install the conda environment:
 ```
 git clone https://github.com/zhang-tuo-pdf/FedAudio.git
-cd FedSpeech22
+cd FedAudio
 conda env create -f fedspeech.yml
 conda activate fedml
 ```
