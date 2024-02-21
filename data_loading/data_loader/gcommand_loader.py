@@ -239,7 +239,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--env_feature",
-        default=True,
+        default=False,
         type=lambda x: (str(x).lower() == 'true'),
         help="Adding esc-50 features or not: True/False"
     )

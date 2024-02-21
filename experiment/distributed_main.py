@@ -224,6 +224,9 @@ def add_args(parser):
     parser.add_argument('--fl_feature', type=bool, default=False,
                         help='raw data or nosiy data')
 
+    parser.add_argument('--env_feature', type=bool, default=False,
+                        help='Adding esc-50 features or not: True/False')
+
     parser.add_argument('--label_nosiy', type=bool, default=False,
                         help='clean label or nosiy label')
 
@@ -298,6 +301,17 @@ def load_data(args, dataset_name):
                 + ".p"
             )
             logging.info("Processing the nosiy data with snr level %s" % str(args.db_level))
+        elif args.env_feature:
+            save_file_name = (
+                "speech_commands/federated_esc50__dataset_"
+                + args.process_method
+                + "_"
+                + args.feature_type
+                + "_db" 
+                + str(args.db_level)
+                + ".p"
+            )
+            logging.info("Processing the esc nosiy data with snr level %s" % str(args.db_level))
         else:
             save_file_name = (
                 f"{dataset_name}/federated_dataset_"
@@ -623,10 +637,9 @@ if __name__ == "__main__":
         args.best_metric = 0
         
         wandb.init(
-            # mode="disabled",
-            project="fediffusion",
-            entity="tiantiaf",
-            dir=f"/media/data/projects/speech-privacy/fl-syn/fl-syn/syn_dataset/{args.dataset}/",
+            mode="disabled",
+            project="fedaudio",
+            entity="ultrazt",
             name=str(args.fl_algorithm)
             + "-r"
             + str(args.comm_round)

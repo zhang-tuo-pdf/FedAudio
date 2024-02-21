@@ -31,7 +31,7 @@ In our repo, we include FedML open source software (https://github.com/FedML-AI/
 To begin with, please clone this repo and install the conda environment:
 ```
 git clone https://github.com/zhang-tuo-pdf/FedAudio.git
-cd FedSpeech22
+cd FedAudio
 conda env create -f fedspeech.yml
 conda activate fedml
 ```
@@ -101,8 +101,8 @@ python gcommand_loader.py
 step 2: run the fl training
 ```
 cd experiment
-sh run_distributed.sh gcommand 2118 10 8 30 1 16 0.1 0 8
-# dataset name, total client number, sampled client number, gpu number for running, round number, local epoch number, batch size, lr, start gpu, total gpu number in machine
+sh run_distributed.sh gcommand raw mel_spec 106 8 5000 1 16 0.1 0 8
+# dataset name, process_method, feature type, sampled client number, gpu number for running, round number, local epoch number, batch size, lr, start gpu, total gpu number in machine
 ```
 
 ## Contact
