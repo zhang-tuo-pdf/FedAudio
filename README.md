@@ -6,6 +6,7 @@
 * Supported Dataset
 * Usage
 * Contact
+* Linkage with [GPT-FL](https://arxiv.org/abs/2306.02210)
 
 ## Overview
 Federated Learning has gained considerable interest in enabling multiple clients holding sensitive data to collaboratively train machine learning models without centralizing data. However, while many works have addressed the application of audio tasks with FL, few realistic FL datasets exist as benchmarks for algorithmic research. 
@@ -104,6 +105,12 @@ cd experiment
 sh run_distributed.sh gcommand raw mel_spec 106 8 5000 1 16 0.1 0 8
 # dataset name, process_method, feature type, sampled client number, gpu number for running, round number, local epoch number, batch size, lr, start gpu, total gpu number in machine
 ```
+
+## Linkage with GPT-FL
+The audio-related experiments in GPT-FL are conducted with the FedAudio package. Specifically, we include the synthetic-data-based pre-train model weights in this repo under the 'model folder'.
+
+To reproduce the GPT-FL results in Table 5, the user could set the "arg.pretrained" in "FedAudio/experiment/distributed_main.py" equal to 1 to load the synthetic-data-based pre-train model weights as the initialization point for FL training.
+
 
 ## Contact
 
