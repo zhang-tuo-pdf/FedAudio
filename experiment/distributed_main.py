@@ -103,6 +103,13 @@ def add_args(parser):
     )
 
     parser.add_argument(
+        "--pretrained",
+        type=int,
+        default=0,
+        help="Pretrained model or not",
+    )
+
+    parser.add_argument(
         "--client_optimizer", type=str, default="sgd", help="SGD with momentum; adam"
     )
 
@@ -282,7 +289,7 @@ def load_data(args, dataset_name):
     if dataset_name == "gcommand":
         if args.fl_feature:
             save_file_name = (
-                "speech_commands/federated_dataset_"
+                f"{dataset_name}/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -293,7 +300,7 @@ def load_data(args, dataset_name):
             logging.info("Processing the nosiy data with snr level %s" % str(args.db_level))
         else:
             save_file_name = (
-                "speech_commands/federated_dataset_"
+                f"{dataset_name}/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -331,10 +338,10 @@ def load_data(args, dataset_name):
         load_file_path = args.data_dir + save_file_name
         dataset = pickle.load(open(load_file_path, "rb"))
         logging.info("dataset has been loaded from saved file")
-    if dataset_name == 'urban_sound':
+    if dataset_name == 'urban_sound' or dataset_name == "esc50":
         if args.fl_feature:
             save_file_name = (
-                "urban_sound/federated_dataset_"
+                f"{dataset_name}/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -350,7 +357,7 @@ def load_data(args, dataset_name):
             logging.info("Processing the nosiy data with snr level %s" % save_file_name)
         else:
             save_file_name = (
-                "urban_sound/federated_dataset_"
+                f"{dataset_name}/federated_dataset_"
                 + args.process_method
                 + "_"
                 + args.feature_type
@@ -535,6 +542,9 @@ def create_model(args):
         model = audio_rnn(feature_size=feature_size, dropout=0.1, label_size=label_size)
     elif args.model == "BC_ResNet":
         model = BCResNet()
+    if args.pretrained == 1:
+        save_path = f'/media/data/projects/speech-privacy/fl-syn/fl-syn/syn_dataset/{args.dataset}/model_check_point/{args.dataset}.pth'
+        model.load_state_dict(torch.load(save_path))
     return model
 
 
@@ -590,7 +600,7 @@ if __name__ == "__main__":
             test_fold = ""
         else:
             test_fold = "-fd" + str(args.test_fold)
-        if args.dataset == "urban_sound":
+        if args.dataset == "urban_sound" or args.dataset == "esc50":
             alpha_str = "-alpha" + str(args.alpha).replace(".", "")
         else:
             alpha_str = ""
@@ -614,8 +624,9 @@ if __name__ == "__main__":
         
         wandb.init(
             # mode="disabled",
-            project="fedaudio",
-            entity="ultrazt",
+            project="fediffusion",
+            entity="tiantiaf",
+            dir=f"/media/data/projects/speech-privacy/fl-syn/fl-syn/syn_dataset/{args.dataset}/",
             name=str(args.fl_algorithm)
             + "-r"
             + str(args.comm_round)
