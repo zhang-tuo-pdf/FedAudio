@@ -116,10 +116,13 @@ To reproduce the GPT-FL results in Table 5, the user could set the "arg.pretrain
 
 If you like our works, please cite our paper in your publications.
 ```
-@inproceedings{Zhang2022FedAudioAF,
+@article{Zhang2022FedAudioAF,
   title={FedAudio: A Federated Learning Benchmark for Audio Tasks},
   author={Tuo Zhang and Tiantian Feng and Samiul Alam and Sunwoo Lee and Mi Zhang and Shrikanth S. Narayanan and Salman Avestimehr},
-  year={2022}
+  journal={ICASSP 2023 - 2023 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  year={2022},
+  pages={1-5},
+  url={https://api.semanticscholar.org/CorpusID:253224220}
 }
 ```
 
